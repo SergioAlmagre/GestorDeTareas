@@ -30,6 +30,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -66,4 +67,29 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
+    implementation("androidx.navigation:navigation-compose:2.7.6")
+    implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
+
+    // Amplify plugins
+    implementation("com.amplifyframework:core:2.14.8")
+    implementation("com.amplifyframework:aws-api:2.14.8")
+    implementation("com.amplifyframework:aws-datastore:2.14.8")
+    implementation("com.amplifyframework:aws-auth-cognito:2.14.8")
+    implementation("com.amplifyframework:aws-storage-s3:2.14.8")
+
+    // Support for Java 8 features
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-android
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-play-services
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
+
+    implementation("com.google.accompanist:accompanist-coil:0.15.0") //Para los Toast de compose sin hacer lo del context
+
+    //Necesario para la carga de Imágenes (preferible a Glide).
+    implementation("io.coil-kt:coil-compose:1.3.2")
 }
