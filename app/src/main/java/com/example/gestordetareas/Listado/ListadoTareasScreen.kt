@@ -46,13 +46,11 @@ import com.example.a2_practicamvvm.Rutas
 import com.example.gestordetareas.Principal.CerrarSesion
 import com.example.gestordetareas.Principal.PrincipalViewModel
 
-
-
 @Composable
 fun Listado(
     navController: NavHostController,
     principalViewModel: PrincipalViewModel,
-    listadoViewModel: ListadoViewModel
+    listadoTareasViewModel: ListadoTareasViewModel
 ) {
     var context = LocalContext.current
     Box(
@@ -62,7 +60,7 @@ fun Listado(
     ) {
         Column {
             Text("Listado", fontSize = 20.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-            Body( navController, principalViewModel, listadoViewModel)
+            Body( navController, principalViewModel, listadoTareasViewModel)
             CerrarSesion(context)
         }
 
@@ -70,10 +68,10 @@ fun Listado(
 }
 
 @Composable
-fun Body(navController: NavHostController, principalViewModel: PrincipalViewModel, listadoViewModel: ListadoViewModel) {
+fun Body(navController: NavHostController, principalViewModel: PrincipalViewModel, listadoTareasViewModel: ListadoTareasViewModel) {
     Column {
         //Text(listadoViewModel.usuarios.toString())
-        TareasList(listadoViewModel = listadoViewModel)
+        TareasList(listadoTareasViewModel = listadoTareasViewModel)
         IrPrincipalButton(){
             navController.navigate(Rutas.Principal)
         }
@@ -81,10 +79,10 @@ fun Body(navController: NavHostController, principalViewModel: PrincipalViewMode
 }
 
 @Composable
-fun TareasList(listadoViewModel: ListadoViewModel) {
-    val tareas = listadoViewModel.tareas
+fun TareasList(listadoTareasViewModel: ListadoTareasViewModel) {
+    val tareas = listadoTareasViewModel.tareas
     val context = LocalContext.current
-    val showDialogBorrar: Boolean by listadoViewModel.showDialogBorrar.observeAsState(false)
+    val showDialogBorrar: Boolean by listadoTareasViewModel.showDialogBorrar.observeAsState(false)
 
     LazyColumn {
         items(tareas) { tarea ->
@@ -94,8 +92,8 @@ fun TareasList(listadoViewModel: ListadoViewModel) {
                     Toast.makeText(context, "Usuario sel: $tar", Toast.LENGTH_SHORT).show()
                 }
                 if (tipo == 2){//Long click
-                    listadoViewModel.dialogOpen()
-                    listadoViewModel.tareaBorrar(tar)
+                    listadoTareasViewModel.dialogOpen()
+                    listadoTareasViewModel.tareaBorrar(tar)
                     Log.e("Fernando","Long click pulsado")
                 }
                 if (tipo == 3){//Double click
@@ -107,12 +105,12 @@ fun TareasList(listadoViewModel: ListadoViewModel) {
     if (showDialogBorrar) {
         MyAlertDialog(
             onConfirm = {
-                listadoViewModel.dialogClose()
-                Log.e("Fernando",listadoViewModel.tarBorrar.toString())
-                listadoViewModel.onItemRemove(listadoViewModel.tarBorrar)
+                listadoTareasViewModel.dialogClose()
+                Log.e("Sergio",listadoTareasViewModel.tarBorrar.toString())
+                listadoTareasViewModel.onItemRemove(listadoTareasViewModel.tarBorrar)
             },
             onDismiss = {
-                listadoViewModel.dialogClose()
+                listadoTareasViewModel.dialogClose()
             }
         )
     }
