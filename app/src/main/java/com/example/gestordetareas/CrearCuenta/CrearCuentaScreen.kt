@@ -45,6 +45,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.amplifyframework.AmplifyException
+import com.amplifyframework.auth.AuthException
 import com.amplifyframework.auth.AuthUserAttributeKey
 import com.amplifyframework.auth.options.AuthSignUpOptions
 import com.amplifyframework.core.Amplify
@@ -112,10 +114,12 @@ fun CrearCuenta(
                                     Log.i("Sergio", "Signup ok")
                                     crearCuentaViewModel.setRegistroCorrecto(1)
                                     Toast.makeText(context, "Registro correcto", Toast.LENGTH_SHORT).show()
+
                                 } else {
                                     Log.i("Sergio", "Registro correcto, falta confirmación")
                                     crearCuentaViewModel.setRegistroCorrecto(2)
                                     Toast.makeText(context, "Registro correcto, falta confirmación", Toast.LENGTH_SHORT).show()
+                                    navController.navigate(Rutas.Login)
                                 }
                             }
                         },
@@ -124,6 +128,13 @@ fun CrearCuenta(
                                 Log.e("Sergio", "Error en el registro fallido: ", error)
                                 crearCuentaViewModel.setRegistroCorrecto(3)
                                 Toast.makeText(context, "Error grave en el registro", Toast.LENGTH_SHORT).show()
+                                if (error is AmplifyException) {
+                                    val cause = error.cause
+                                    if (cause != null) {
+                                        Log.e("Sergio", "Cause: ${cause.message}")
+                                        // Puedes acceder a más detalles del error aquí según sea necesario
+                                    }
+                                }
                             }
                         }
                     )
