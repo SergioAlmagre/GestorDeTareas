@@ -5,4 +5,5 @@ object Rutas {
     val Login = "Login"
     val Principal = "Principal"
     val Listado = "Listado"
+    val EleccionAdministrador = "EleccionAdministrador"
 }

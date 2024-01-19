@@ -1,16 +1,13 @@
 package com.example.gestordetareas.Listado
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.amplifyframework.core.Amplify
-import com.amplifyframework.core.model.query.Where
 import com.example.gestordetareas.Tarea.Tarea
 
-class ListadoViewModel : ViewModel() {
+class ListadoTareasViewModel : ViewModel() {
     private val _tareas : ArrayList<Tarea> by mutableStateOf(arrayListOf())
     val tareas : ArrayList<Tarea> = _tareas
 

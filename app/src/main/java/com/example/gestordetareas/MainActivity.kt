@@ -22,8 +22,9 @@ import com.amplifyframework.datastore.AWSDataStorePlugin
 import com.example.a2_practicamvvm.Rutas
 import com.example.gestordetareas.CrearCuenta.CrearCuenta
 import com.example.gestordetareas.CrearCuenta.CrearCuentaViewModel
+import com.example.gestordetareas.EleccionAdministrador.botonesSeleccion
 import com.example.gestordetareas.Listado.Listado
-import com.example.gestordetareas.Listado.ListadoViewModel
+import com.example.gestordetareas.Listado.ListadoTareasViewModel
 import com.example.gestordetareas.Login.Login
 import com.example.gestordetareas.Principal.Principal
 import com.example.gestordetareas.Principal.PrincipalViewModel
@@ -34,7 +35,7 @@ import com.example.gestordetareas.Login.LoginViewModel
 
 class MainActivity : ComponentActivity() {
     val princiaplVM = PrincipalViewModel()
-    val listadoVM = ListadoViewModel()
+    val listadoVM = ListadoTareasViewModel()
     val usuarioVM = UsuarioViewModel()
     val loginVM = LoginViewModel()
     val crearCuentaVM = CrearCuentaViewModel()
@@ -51,8 +52,12 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     NavHost(navController = navController, startDestination = Rutas.CrearCuenta){
 
+                        composable(Rutas.EleccionAdministrador){
+                            botonesSeleccion()
+                        }
+
                         composable(Rutas.CrearCuenta){
-                            CrearCuenta(navController, princiaplVM, listadoVM, loginVM, crearCuentaVM)
+                            CrearCuenta(navController, listadoVM, loginVM, crearCuentaVM)
                         }
 
                         composable(Rutas.Login){

@@ -52,7 +52,7 @@ import com.amplifyframework.auth.cognito.result.AWSCognitoAuthSignOutResult
 import com.amplifyframework.auth.options.AuthSignOutOptions
 import com.amplifyframework.core.Amplify
 import com.example.a2_practicamvvm.Rutas
-import com.example.gestordetareas.Listado.ListadoViewModel
+import com.example.gestordetareas.Listado.ListadoTareasViewModel
 import com.example.gestordetareas.Tarea.Tarea
 import kotlinx.coroutines.launch
 
@@ -61,7 +61,7 @@ import kotlinx.coroutines.launch
 fun Principal(
     navController: NavHostController,
     principalViewModel: PrincipalViewModel,
-    listadoViewModel: ListadoViewModel
+    listadoTareasViewModel: ListadoTareasViewModel
 ) {
     val showDialog: Boolean by principalViewModel.showDialog.observeAsState(false)
     var context = LocalContext.current
@@ -83,7 +83,7 @@ fun Principal(
                     onDismiss = { principalViewModel.onDialogClose() },
                     onTareaAdded = {
                         principalViewModel.onDialogClose()
-                        listadoViewModel.onTareaCreated(it)
+                        listadoTareasViewModel.onTareaCreated(it)
                     })
             }
             Spacer(modifier = Modifier.size(300.dp))
