@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-                    NavHost(navController = navController, startDestination = Rutas.CrearCuenta){
+                    NavHost(navController = navController, startDestination = Rutas.Login){
 
                         composable(Rutas.EleccionAdministrador){
                             botonesSeleccion()

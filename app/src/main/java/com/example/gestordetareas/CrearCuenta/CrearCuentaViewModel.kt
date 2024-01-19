@@ -18,6 +18,9 @@ class CrearCuentaViewModel {
     private val _pwd2 = MutableLiveData<String>()
     val pwd2 : LiveData<String> = _pwd2
 
+    private val _codigoVerificacion = MutableLiveData<String>()
+    val codigoVerificacion : LiveData<String> = _codigoVerificacion
+
     private val _isRegistrarEnable = MutableLiveData<Boolean>()
     val isLoginEnable : LiveData<Boolean> = _isRegistrarEnable
 
@@ -30,6 +33,10 @@ class CrearCuentaViewModel {
         _pwd.value = pwd1
         _pwd2.value = pwd2
         _isRegistrarEnable.value = enableRegistrar(email,pwd1,pwd2)
+    }
+
+    fun onCodigoVerificacionCambiado(codigo:String){
+        _codigoVerificacion.value = codigo
     }
 
     fun setRegistroCorrecto(valor:Int){
