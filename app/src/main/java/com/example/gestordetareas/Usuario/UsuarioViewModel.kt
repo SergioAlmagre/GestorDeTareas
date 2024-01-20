@@ -3,6 +3,9 @@ package com.example.gestordetareas.Usuario
 import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.amplifyframework.core.Amplify
+import com.amplifyframework.datastore.generated.model.Usuario
+import java.util.concurrent.CompletableFuture
 
 class UsuarioViewModel {
     private val _nombreCompleto = MutableLiveData<String>()
@@ -66,6 +69,24 @@ class UsuarioViewModel {
         _isLogoutOk.value = false
     }
 
+
+    fun insertarUsuario(usuario: Usuario): CompletableFuture<Boolean> {
+        val completableFuture = CompletableFuture<Boolean>()
+
+        Amplify.DataStore.save(
+            usuario,
+            { success ->
+                println("Usuario guardado correctamente")
+                completableFuture.complete(true)
+            },
+            { error ->
+                println("Error al guardar el usuario: $error")
+                completableFuture.complete(false)
+            }
+        )
+
+        return completableFuture
+    }
 
 
 

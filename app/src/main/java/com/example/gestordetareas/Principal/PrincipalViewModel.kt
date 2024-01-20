@@ -6,18 +6,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.model.query.Where
-import com.amplifyframework.datastore.generated.model.Tarea
 
 class PrincipalViewModel : ViewModel(){
 
     private val _descripcion =  MutableLiveData<String>()
     val descripcion : LiveData<String> = _descripcion
 
-    private val _estimacionHoras =  MutableLiveData<Float>()
-    val estimacionHoras : LiveData<Float> = _estimacionHoras
+    private val _estimacionHoras =  MutableLiveData<Double>()
+    val estimacionHoras : LiveData<Double> = _estimacionHoras
 
-    private val _horasInvertidas = MutableLiveData<Float>()
-    val horasInvertidas : LiveData<Float> = _horasInvertidas
+    private val _horasInvertidas = MutableLiveData<Double>()
+    val horasInvertidas : LiveData<Double> = _horasInvertidas
 
     private val _dificultad = MutableLiveData<String>()
     val dificultad: LiveData<String> = _dificultad
@@ -33,7 +32,7 @@ class PrincipalViewModel : ViewModel(){
 
     fun onDialogClose() {
         this._descripcion.value = ""
-        this._estimacionHoras.value = 0.0f
+        this._estimacionHoras.value = 0.0
         this._dificultad.value = ""
         this._estaFinalizada.value = false
         _showDialog.value = false
@@ -49,8 +48,8 @@ class PrincipalViewModel : ViewModel(){
 
 
     fun cambiarEstimacionHoras(e: String) {
-        val floatValue = e.toFloatOrNull() ?: 0.0f
-        this._estimacionHoras.value = floatValue
+        val doubleValue = e.toDoubleOrNull() ?: 0.0
+        this._estimacionHoras.value = doubleValue
     }
 
     fun cambiarDificultad(it: String) {
@@ -90,7 +89,7 @@ class PrincipalViewModel : ViewModel(){
         )
     }
 
-    fun crearTarea(descripcion: String, dificultad: String, estimacionHoras: Float, horasInvertidas:Float, estaAsignada:Boolean, estaFinalizada: Boolean) {
+    fun crearTarea(descripcion: String, dificultad: String, estimacionHoras: Double, horasInvertidas:Double, estaAsignada:Boolean, estaFinalizada: Boolean) {
         val t = com.amplifyframework.datastore.generated.model.Tarea.builder().descripcion(descripcion).estimacionHoras(estimacionHoras).horasInvertidas(horasInvertidas).dificultad(dificultad).estaFinalizada(estaFinalizada).estaAsignada(estaAsignada).build()
         Amplify.DataStore.save(
             t,

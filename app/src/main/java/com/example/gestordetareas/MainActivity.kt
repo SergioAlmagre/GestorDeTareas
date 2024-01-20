@@ -2,6 +2,7 @@ package com.example.gestordetareas
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.amplifyframework.AmplifyException
 import com.amplifyframework.api.aws.AWSApiPlugin
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
+import com.amplifyframework.auth.cognito.result.AWSCognitoAuthSignOutResult
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.AWSDataStorePlugin
 import com.example.a2_practicamvvm.Rutas
@@ -32,6 +34,7 @@ import com.example.gestordetareas.Usuario.UsuarioViewModel
 import com.example.gestordetareas.ui.theme.GestorDeTareasTheme
 
 import com.example.gestordetareas.Login.LoginViewModel
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     val princiaplVM = PrincipalViewModel()
@@ -43,12 +46,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+
             GestorDeTareasTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+
                     val navController = rememberNavController()
                     NavHost(navController = navController, startDestination = Rutas.Login){
 
@@ -57,7 +62,7 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(Rutas.CrearCuenta){
-                            CrearCuenta(navController, listadoVM, loginVM, crearCuentaVM)
+                            CrearCuenta(navController,usuarioVM, crearCuentaVM )
                         }
 
                         composable(Rutas.Login){

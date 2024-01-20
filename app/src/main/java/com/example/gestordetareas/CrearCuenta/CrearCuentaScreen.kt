@@ -57,10 +57,12 @@ import com.amplifyframework.AmplifyException
 import com.amplifyframework.auth.AuthUserAttributeKey
 import com.amplifyframework.auth.options.AuthSignUpOptions
 import com.amplifyframework.core.Amplify
+import com.amplifyframework.datastore.generated.model.Usuario
 import com.example.a2_practicamvvm.Rutas
-import com.example.gestordetareas.Listado.ListadoTareasViewModel
 
-import com.example.gestordetareas.Login.LoginViewModel
+import com.example.gestordetareas.Usuario.UsuarioViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -68,8 +70,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun CrearCuenta(
     navController: NavHostController,
-    listadoTareasViewModel: ListadoTareasViewModel,
-    loginViewModel: LoginViewModel,
+    usuarioViewModel: UsuarioViewModel,
     crearCuentaViewModel: CrearCuentaViewModel
 ) {
     var context = LocalContext.current
@@ -106,87 +107,92 @@ fun CrearCuenta(
             }
             Spacer(modifier = Modifier.size(20.dp))
 
-            RegistrarYEnviarCodVerificacion(isLoginEnable){
-                Log.e("Fernando","${nombre}, ${password}, ${email}")
-                try {
-                    Amplify.Auth.signUp(
-                        email,
-                        password,
-                        AuthSignUpOptions.builder()
-                            .userAttribute(AuthUserAttributeKey.email(), email)
-                            .userAttribute(AuthUserAttributeKey.name(), nombre).build(),
-                        { result ->
-                            //Las corrutinas son necesarias para que las variables se actualicen y puedan ser usadas en el finally.
-                            coroutineScope.launch {
-                                if (result.isSignUpComplete) {
-                                    Log.i("Sergio", "Signup ok")
-                                    crearCuentaViewModel.setRegistroCorrecto(1)
-                                    Toast.makeText(context, "Registro correcto", Toast.LENGTH_SHORT).show()
+            Box(modifier = Modifier
+                .fillMaxWidth(),
+                contentAlignment = Alignment.Center) {
+                RegistrarYEnviarCodVerificacion(isLoginEnable){
+                    Log.e("Sergio","${nombre}, ${password}, ${email}")
+                    try {
+                        Amplify.Auth.signUp(
+                            email,
+                            password,
+                            AuthSignUpOptions.builder()
+                                .userAttribute(AuthUserAttributeKey.email(), email)
+                                .userAttribute(AuthUserAttributeKey.name(), nombre).build(),
+                            { result ->
+                                //Las corrutinas son necesarias para que las variables se actualicen y puedan ser usadas en el finally.
+                                coroutineScope.launch {
+                                    if (result.isSignUpComplete) {
+                                        Log.i("Sergio", "Signup ok")
+                                        crearCuentaViewModel.setRegistroCorrecto(1)
+                                        Toast.makeText(context, "Registro correcto", Toast.LENGTH_SHORT).show()
 
-                                } else {
-                                    Log.i("Sergio", "Registro correcto, falta confirmación")
-                                    crearCuentaViewModel.setRegistroCorrecto(2)
-                                    Toast.makeText(context, "Registro correcto, falta confirmación", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        },
-                        { error ->
-                            coroutineScope.launch {
-                                Log.e("Sergio", "Error en el registro fallido: ", error)
-                                crearCuentaViewModel.setRegistroCorrecto(3)
-                                Toast.makeText(context, "Error grave en el registro", Toast.LENGTH_SHORT).show()
-                                if (error is AmplifyException) {
-                                    val cause = error.cause
-                                    if (cause != null) {
-                                        Log.e("Sergio", "Cause: ${cause.message}")
-                                        // Puedes acceder a más detalles del error aquí según sea necesario
+                                    } else {
+                                        Log.i("Sergio", "Registro correcto, falta confirmación")
+                                        crearCuentaViewModel.setRegistroCorrecto(2)
+                                        Toast.makeText(context, "Código enviado! revisa tu email", Toast.LENGTH_SHORT).show()
                                     }
                                 }
-                            }
-                        }
-                    )
-                }
-                catch (e:Exception){
-                }
-                finally {
-                    if (isRegistroCorrecto == 1) {
-                        try {
-                            //Callbacks
-                            Amplify.Auth.signIn(
-                                email,
-                                password,
-                                { result ->
-                                    //Las corrutinas son necesarias para que funcione el Toast. En este ejemplo no uso variables como en el registro y llamo directamente al Toast.
-                                    coroutineScope.launch {
-                                        if (result.isSignedIn) {
-                                            Log.i("Fernando", "Login correcto")
-                                            navController.navigate(Rutas.Principal)
-                                            Toast.makeText(context, "Login correcto", Toast.LENGTH_SHORT).show()
-                                        } else {
-                                            Log.e("Fernando", "Algo ha fallado en el login")
-                                            Toast.makeText(context, "Algo ha fallado en el login", Toast.LENGTH_SHORT).show()
+                            },
+                            { error ->
+                                coroutineScope.launch {
+                                    Log.e("Sergio", "Error en el registro fallido: ", error)
+                                    crearCuentaViewModel.setRegistroCorrecto(3)
+                                    Toast.makeText(context, "Error grave en el registro", Toast.LENGTH_SHORT).show()
+                                    if (error is AmplifyException) {
+                                        val cause = error.cause
+                                        if (cause != null) {
+                                            Log.e("Sergio", "Cause: ${cause.message}")
+                                            // Puedes acceder a más detalles del error aquí según sea necesario
                                         }
                                     }
-                                },
-                                { error ->
-                                    coroutineScope.launch {
-                                        Log.e("Sergio", error.toString())
-                                        Toast.makeText(context, error.message,Toast.LENGTH_SHORT).show()
-                                    }
                                 }
-                            )
-                        }
-                        catch (e:Exception){
-                        }
+                            }
+                        )
                     }
-                    if (isRegistroCorrecto == 2) {
-
+                    catch (e:Exception){
                     }
-                    if (isRegistroCorrecto == 3) {
+                    finally {
+                        if (isRegistroCorrecto == 1) {
+                            try {
+                                //Callbacks
+                                Amplify.Auth.signIn(
+                                    email,
+                                    password,
+                                    { result ->
+                                        //Las corrutinas son necesarias para que funcione el Toast. En este ejemplo no uso variables como en el registro y llamo directamente al Toast.
+                                        coroutineScope.launch {
+                                            if (result.isSignedIn) {
+                                                Log.i("Fernando", "Login correcto")
+                                                navController.navigate(Rutas.Principal)
+                                                Toast.makeText(context, "Login correcto", Toast.LENGTH_SHORT).show()
+                                            } else {
+                                                Log.e("Fernando", "Algo ha fallado en el login")
+                                                Toast.makeText(context, "Algo ha fallado en el login", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    },
+                                    { error ->
+                                        coroutineScope.launch {
+                                            Log.e("Sergio", error.toString())
+                                            Toast.makeText(context, error.message,Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                )
+                            }
+                            catch (e:Exception){
+                            }
+                        }
+                        if (isRegistroCorrecto == 2) {
 
+                        }
+                        if (isRegistroCorrecto == 3) {
+
+                        }
                     }
                 }
             }
+
             Spacer(modifier = Modifier.size(60.dp))
             Row {
                 CodigoVerificacionBox(codigoVerificacion){
@@ -206,6 +212,20 @@ fun CrearCuenta(
                                         "Registro confirmado exitosamente",
                                         Toast.LENGTH_SHORT
                                     ).show()
+
+                                    var usu = Usuario.builder().rol(Rutas.rolProgramador).nombreCompleto(nombre).email(email).tareasFinalizadas(0).build()
+
+                                    usuarioViewModel.insertarUsuario(
+                                        usu).thenAccept { success ->
+                                        if (success) {
+                                            GlobalScope.launch(Dispatchers.Main) {//Para que se ejecute en el hilo principal
+                                                navController.navigate(Rutas.Principal)
+                                            }
+
+                                        } else {
+                                                                                    // Error al guardar el usuario
+                                        }
+                                    }
                                 } else {
                                     Log.i("Sergio", "Confirm sign up not complete")
                                 }
@@ -422,13 +442,14 @@ fun RegistrarYEnviarCodVerificacion(isRegistroEnable : Boolean, onClickAction: (
             onClickAction(true);
         },
         enabled = isRegistroEnable,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .width(250.dp),
         colors = ButtonDefaults.buttonColors(
             contentColor = Color.White,
             disabledContentColor = Color.White
         )
     ) {
-        Text(text = "Enviar código de verificación")
+        Text(text = "Solicitar código de verificación")
     }
 }
 

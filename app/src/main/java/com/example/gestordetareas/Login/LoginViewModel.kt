@@ -1,9 +1,15 @@
 package com.example.gestordetareas.Login
 
+import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavHostController
+import com.amplifyframework.core.Amplify
+import com.amplifyframework.core.model.query.Where
+import com.amplifyframework.datastore.generated.model.Usuario
+
 
 class LoginViewModel:ViewModel() {
 
@@ -71,4 +77,37 @@ class LoginViewModel:ViewModel() {
     fun disableLogoutOk(){
         _isLogoutOk.value = false
     }
+
+    fun getRolByEmail(email: String): Int ?{
+        var rol:Int = 1
+        Amplify.DataStore.query(
+            Usuario::class.java,
+            Where.matches(Usuario.EMAIL.eq(email)),
+            { usuarios ->
+                if (usuarios.hasNext()) {
+                    val usuario = usuarios.next()
+                    Log.d("Sergio", "Usuario encontrado: $usuario")
+                    Log.d("Sergio", "Rol del usuario: ${usuario.rol}")
+                    rol = usuario.rol
+                } else {
+                    Log.d("Sergio", "Usuario no encontrado para el email: $email")
+                }
+            },
+            { exception ->
+                Log.e("Sergio", "Error al buscar el usuario por email: $email", exception)
+
+            }
+        )
+        return rol
+    }
+
+
+
+
+
+
+
+
+
+
 }

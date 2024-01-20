@@ -57,7 +57,8 @@ import com.example.a2_practicamvvm.Rutas
 import com.example.gestordetareas.Listado.ListadoTareasViewModel
 import com.example.gestordetareas.Principal.PrincipalViewModel
 import androidx.compose.ui.Alignment
-
+import com.amplifyframework.datastore.AWSDataStorePlugin
+import android.content.Context
 
 
 
@@ -88,8 +89,11 @@ fun Login(
             .padding(8.dp)
     ) {
         Column {
+
             Spacer(modifier = Modifier.size(40.dp))
-            Text("Bienvenid@", fontSize = 40.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(10.dp))
+            Text("Bienvenid@", fontSize = 40.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp))
             Spacer(modifier = Modifier.size(40.dp))
             Email(email) {
                 loginViewModel.onRegistroCambiado(email = it, pass = password)
@@ -111,18 +115,24 @@ fun Login(
                             //Las corrutinas son necesarias para que funcione el Toast. En este ejemplo no uso variables como en el registro y llamo directamente al Toast.
                             coroutineScope.launch {
                                 if (result.isSignedIn) {
-                                    Log.i("Fernando", "Login correcto")
-                                    navController.navigate(Rutas.Principal)
-                                    Toast.makeText(context, "Login correcto", Toast.LENGTH_SHORT).show()
+                                    Log.i("Sergio", "Login correcto")
+
+                                    if (loginViewModel.getRolByEmail(email) == 1) {
+                                        navController.navigate(Rutas.EleccionAdministrador)
+                                    }else{
+                                        navController.navigate(Rutas.Principal)
+//                                      Toast.makeText(context, "Login correcto", Toast.LENGTH_SHORT).show()
+                                    }
+
                                 } else {
-                                    Log.e("Fernando", "Algo ha fallado en el login")
+                                    Log.e("Sergio", "Algo ha fallado en el login")
                                     Toast.makeText(context, "Algo ha fallado en el login", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         },
                         { error ->
                             coroutineScope.launch {
-                                Log.e("Fernando", error.toString())
+                                Log.e("Sergio error", error.toString())
                                 Toast.makeText(context, error.message,Toast.LENGTH_SHORT).show()
                             }
                         }
@@ -142,37 +152,9 @@ fun Login(
                     }
                 }
 
-//                Bloque de confirmación de login (comentar / descomentar).
-                Amplify.Auth.confirmSignUp(
-
-                    "faranzabe@cifpvirgendegracia.com", "325464",
-
-                    { result ->
-
-                        if (result.isSignUpComplete) {
-
-                            Log.i("Fernando", "Confirm signUp succeeded")
-
-                        } else {
-
-                            Log.i("Fernando","Confirm sign up not complete")
-
-                        }
-
-                    },
-
-                    { Log.e("Fernando", "Failed to confirm sign up", it) }
-
-                )
-
-//                Bloque para reenviar el código de confirmación
-                Amplify.Auth.resendUserAttributeConfirmationCode(
-                    AuthUserAttributeKey.email(),
-                    { Log.i("AuthDemo", "Code was sent again: $it") },
-                    { Log.e("AuthDemo", "Failed to resend code", it) }
-                )
             }
             Spacer(modifier = Modifier.size(200.dp))
+            CerrarSesionYAplicacion(context = context)
             crearCuenta {
                 navController.navigate(Rutas.CrearCuenta)
             }
@@ -306,10 +288,39 @@ fun Password(password: String, onTextChanged: (String) -> Unit) {
 }
 
 @Composable
-fun CerrarSesion(){
+fun CerrarAplicacion(){
     val activity = LocalContext.current as Activity
     Button(modifier = Modifier.fillMaxWidth(), onClick = { activity.finish() }) {
         Text(text = "Cerrar aplicación")
+    }
+}
+
+@Composable
+fun CerrarSesionYAplicacion(context: Context){
+    val activity = LocalContext.current as Activity
+    val coroutineScope = rememberCoroutineScope()
+
+    Button(modifier = Modifier.fillMaxWidth(), onClick = {
+        val options = AuthSignOutOptions.builder()
+            .globalSignOut(true)
+            .build()
+
+        Amplify.Auth.signOut(options) { signOutResult ->
+            coroutineScope.launch {
+                if (signOutResult is AWSCognitoAuthSignOutResult.CompleteSignOut) {
+                    Log.i("Fernando", "Logout correcto")
+                    Toast.makeText(context,"Logout ok", Toast.LENGTH_SHORT).show()
+                } else if (signOutResult is AWSCognitoAuthSignOutResult.PartialSignOut) {
+                } else if (signOutResult is AWSCognitoAuthSignOutResult.FailedSignOut) {
+                    Log.e("Fernando", "Algo ha fallado en el logout")
+                    Toast.makeText(context,"Algo ha fallado en el logout", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+//        activity.finish()
+         }) {
+        Text(text = "Cerrar aplicación")
+
     }
 }
 
@@ -337,7 +348,8 @@ fun Login(isRegistroEnable : Boolean, onClickAction: (Boolean) -> Unit){
             onClickAction(true);
         },
         enabled = isRegistroEnable,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(10.dp)
             .width(200.dp)
             .height(50.dp),
