@@ -1,4 +1,4 @@
-package com.example.gestordetareas.Listado
+package com.example.gestordetareas.ListadoTareas
 
 import com.example.gestordetareas.Tarea.Tarea
 import android.util.Log

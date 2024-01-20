@@ -4,7 +4,8 @@ object Rutas {
     val CrearCuenta = "CrearCuenta"
     val Login = "Login"
     val Principal = "Principal"
-    val Listado = "Listado"
+    val ListadoTareas = "ListadoTaras"
+    val ListadoUsuarios = "ListadoUsuarios"
     val EleccionAdministrador = "EleccionAdministrador"
 
 

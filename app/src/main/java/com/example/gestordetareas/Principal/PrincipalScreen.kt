@@ -52,7 +52,7 @@ import com.amplifyframework.auth.cognito.result.AWSCognitoAuthSignOutResult
 import com.amplifyframework.auth.options.AuthSignOutOptions
 import com.amplifyframework.core.Amplify
 import com.example.a2_practicamvvm.Rutas
-import com.example.gestordetareas.Listado.ListadoTareasViewModel
+import com.example.gestordetareas.ListadoTareas.ListadoTareasViewModel
 import com.example.gestordetareas.Tarea.Tarea
 import kotlinx.coroutines.launch
 
@@ -88,7 +88,7 @@ fun Principal(
             }
             Spacer(modifier = Modifier.size(300.dp))
             IrListadoButton(){
-                navController.navigate(Rutas.Listado)
+                navController.navigate(Rutas.ListadoTareas)
             }
             CerrarSesion(context)
             Column (modifier = Modifier
