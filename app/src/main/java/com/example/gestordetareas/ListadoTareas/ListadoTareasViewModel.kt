@@ -1,4 +1,4 @@
-package com.example.gestordetareas.Listado
+package com.example.gestordetareas.ListadoTareas
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

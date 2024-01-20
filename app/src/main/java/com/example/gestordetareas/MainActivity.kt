@@ -2,7 +2,6 @@ package com.example.gestordetareas
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,15 +17,14 @@ import androidx.navigation.compose.rememberNavController
 import com.amplifyframework.AmplifyException
 import com.amplifyframework.api.aws.AWSApiPlugin
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
-import com.amplifyframework.auth.cognito.result.AWSCognitoAuthSignOutResult
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.AWSDataStorePlugin
 import com.example.a2_practicamvvm.Rutas
 import com.example.gestordetareas.CrearCuenta.CrearCuenta
 import com.example.gestordetareas.CrearCuenta.CrearCuentaViewModel
 import com.example.gestordetareas.EleccionAdministrador.botonesSeleccion
-import com.example.gestordetareas.Listado.Listado
-import com.example.gestordetareas.Listado.ListadoTareasViewModel
+import com.example.gestordetareas.ListadoTareas.Listado
+import com.example.gestordetareas.ListadoTareas.ListadoTareasViewModel
 import com.example.gestordetareas.Login.Login
 import com.example.gestordetareas.Principal.Principal
 import com.example.gestordetareas.Principal.PrincipalViewModel
@@ -34,7 +32,6 @@ import com.example.gestordetareas.Usuario.UsuarioViewModel
 import com.example.gestordetareas.ui.theme.GestorDeTareasTheme
 
 import com.example.gestordetareas.Login.LoginViewModel
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     val princiaplVM = PrincipalViewModel()
@@ -55,10 +52,10 @@ class MainActivity : ComponentActivity() {
                 ) {
 
                     val navController = rememberNavController()
-                    NavHost(navController = navController, startDestination = Rutas.Login){
+                    NavHost(navController = navController, startDestination = Rutas.EleccionAdministrador){
 
                         composable(Rutas.EleccionAdministrador){
-                            botonesSeleccion()
+                            botonesSeleccion(navController)
                         }
 
                         composable(Rutas.CrearCuenta){
@@ -71,7 +68,7 @@ class MainActivity : ComponentActivity() {
                         composable(Rutas.Principal){
                             Principal(navController, princiaplVM, listadoVM)
                         }
-                        composable(Rutas.Listado){
+                        composable(Rutas.ListadoTareas){
                             Listado(navController, princiaplVM, listadoVM)
                         }
                     }
