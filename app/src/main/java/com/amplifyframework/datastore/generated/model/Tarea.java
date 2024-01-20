@@ -38,8 +38,8 @@ public final class Tarea implements Model {
   private final @ModelField(targetType="ID", isRequired = true) String id;
   private final @ModelField(targetType="String") String descripcion;
   private final @ModelField(targetType="String") String dificultad;
-  private final @ModelField(targetType="Float") Float estimacionHoras;
-  private final @ModelField(targetType="Float") Float horasInvertidas;
+  private final @ModelField(targetType="Float") Double estimacionHoras;
+  private final @ModelField(targetType="Float") Double horasInvertidas;
   private final @ModelField(targetType="Boolean") Boolean estaAsignada;
   private final @ModelField(targetType="Boolean") Boolean estaFinalizada;
   private final @ModelField(targetType="Usuario") @HasOne(associatedWith = "id", type = Usuario.class) Usuario UsuarioTarea = null;
@@ -64,11 +64,11 @@ public final class Tarea implements Model {
       return dificultad;
   }
   
-  public Float getEstimacionHoras() {
+  public Double getEstimacionHoras() {
       return estimacionHoras;
   }
   
-  public Float getHorasInvertidas() {
+  public Double getHorasInvertidas() {
       return horasInvertidas;
   }
   
@@ -96,7 +96,7 @@ public final class Tarea implements Model {
       return tareaUsuarioTareaId;
   }
   
-  private Tarea(String id, String descripcion, String dificultad, Float estimacionHoras, Float horasInvertidas, Boolean estaAsignada, Boolean estaFinalizada, String tareaUsuarioTareaId) {
+  private Tarea(String id, String descripcion, String dificultad, Double estimacionHoras, Double horasInvertidas, Boolean estaAsignada, Boolean estaFinalizada, String tareaUsuarioTareaId) {
     this.id = id;
     this.descripcion = descripcion;
     this.dificultad = dificultad;
@@ -203,8 +203,8 @@ public final class Tarea implements Model {
     BuildStep id(String id);
     BuildStep descripcion(String descripcion);
     BuildStep dificultad(String dificultad);
-    BuildStep estimacionHoras(Float estimacionHoras);
-    BuildStep horasInvertidas(Float horasInvertidas);
+    BuildStep estimacionHoras(Double estimacionHoras);
+    BuildStep horasInvertidas(Double horasInvertidas);
     BuildStep estaAsignada(Boolean estaAsignada);
     BuildStep estaFinalizada(Boolean estaFinalizada);
     BuildStep tareaUsuarioTareaId(String tareaUsuarioTareaId);
@@ -215,8 +215,8 @@ public final class Tarea implements Model {
     private String id;
     private String descripcion;
     private String dificultad;
-    private Float estimacionHoras;
-    private Float horasInvertidas;
+    private Double estimacionHoras;
+    private Double horasInvertidas;
     private Boolean estaAsignada;
     private Boolean estaFinalizada;
     private String tareaUsuarioTareaId;
@@ -224,7 +224,7 @@ public final class Tarea implements Model {
       
     }
     
-    private Builder(String id, String descripcion, String dificultad, Float estimacionHoras, Float horasInvertidas, Boolean estaAsignada, Boolean estaFinalizada, String tareaUsuarioTareaId) {
+    private Builder(String id, String descripcion, String dificultad, Double estimacionHoras, Double horasInvertidas, Boolean estaAsignada, Boolean estaFinalizada, String tareaUsuarioTareaId) {
       this.id = id;
       this.descripcion = descripcion;
       this.dificultad = dificultad;
@@ -263,13 +263,13 @@ public final class Tarea implements Model {
     }
     
     @Override
-     public BuildStep estimacionHoras(Float estimacionHoras) {
+     public BuildStep estimacionHoras(Double estimacionHoras) {
         this.estimacionHoras = estimacionHoras;
         return this;
     }
     
     @Override
-     public BuildStep horasInvertidas(Float horasInvertidas) {
+     public BuildStep horasInvertidas(Double horasInvertidas) {
         this.horasInvertidas = horasInvertidas;
         return this;
     }
@@ -304,7 +304,7 @@ public final class Tarea implements Model {
   
 
   public final class CopyOfBuilder extends Builder {
-    private CopyOfBuilder(String id, String descripcion, String dificultad, Float estimacionHoras, Float horasInvertidas, Boolean estaAsignada, Boolean estaFinalizada, String tareaUsuarioTareaId) {
+    private CopyOfBuilder(String id, String descripcion, String dificultad, Double estimacionHoras, Double horasInvertidas, Boolean estaAsignada, Boolean estaFinalizada, String tareaUsuarioTareaId) {
       super(id, descripcion, dificultad, estimacionHoras, horasInvertidas, estaAsignada, estaFinalizada, tareaUsuarioTareaId);
       
     }
@@ -320,12 +320,12 @@ public final class Tarea implements Model {
     }
     
     @Override
-     public CopyOfBuilder estimacionHoras(Float estimacionHoras) {
+     public CopyOfBuilder estimacionHoras(Double estimacionHoras) {
       return (CopyOfBuilder) super.estimacionHoras(estimacionHoras);
     }
     
     @Override
-     public CopyOfBuilder horasInvertidas(Float horasInvertidas) {
+     public CopyOfBuilder horasInvertidas(Double horasInvertidas) {
       return (CopyOfBuilder) super.horasInvertidas(horasInvertidas);
     }
     

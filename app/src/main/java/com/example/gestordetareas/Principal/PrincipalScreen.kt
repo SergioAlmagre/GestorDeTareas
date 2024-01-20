@@ -108,8 +108,8 @@ fun Principal(
 @Composable
 fun AddTareaDialog(principalViewModel:PrincipalViewModel, show: Boolean, onDismiss: () -> Unit, onTareaAdded: (Tarea) -> Unit) {
     val descripcion: String by principalViewModel.descripcion.observeAsState("")
-    val estimacionHoras:Float by principalViewModel.estimacionHoras.observeAsState(0.0f)
-    val horasInvertidas:Float by principalViewModel.horasInvertidas.observeAsState(0.0f)
+    val estimacionHoras:Double by principalViewModel.estimacionHoras.observeAsState(0.0)
+    val horasInvertidas:Double by principalViewModel.horasInvertidas.observeAsState(0.0)
     val dificultad: String by principalViewModel.dificultad.observeAsState("")
     val estaFinalizada:Boolean by principalViewModel.estaFinalizada.observeAsState(false)
     val estaAsignada:Boolean by principalViewModel.estaAsignada.observeAsState(false)
@@ -222,7 +222,6 @@ fun IrListadoButton(onClickAction: (Boolean) -> Unit) {
 fun CerrarSesion(context: Context){
     val activity = LocalContext.current as Activity
     val coroutineScope = rememberCoroutineScope()
-
 
     Button(modifier = Modifier.fillMaxWidth(), onClick = {
         val options = AuthSignOutOptions.builder()

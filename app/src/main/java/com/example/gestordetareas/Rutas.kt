@@ -6,4 +6,9 @@ object Rutas {
     val Principal = "Principal"
     val Listado = "Listado"
     val EleccionAdministrador = "EleccionAdministrador"
+
+
+    //ROLES
+    val rolAdministrador = 0
+    val rolProgramador = 1
 }

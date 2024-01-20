@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -20,6 +23,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -31,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +56,11 @@ import com.amplifyframework.core.Amplify
 import com.example.a2_practicamvvm.Rutas
 import com.example.gestordetareas.Listado.ListadoTareasViewModel
 import com.example.gestordetareas.Principal.PrincipalViewModel
+import androidx.compose.ui.Alignment
+import com.amplifyframework.datastore.AWSDataStorePlugin
+import android.content.Context
+
+
 
 import kotlinx.coroutines.launch
 
@@ -77,14 +89,12 @@ fun Login(
             .padding(8.dp)
     ) {
         Column {
-            Text("Login", fontSize = 20.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
 
-            IrPrincipalButton(){
-                navController.navigate(Rutas.Principal)
-            }
-            Nombre(nombre){
-                loginViewModel.setNombre(it)
-            }
+            Spacer(modifier = Modifier.size(40.dp))
+            Text("Bienvenid@", fontSize = 40.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp))
+            Spacer(modifier = Modifier.size(40.dp))
             Email(email) {
                 loginViewModel.onRegistroCambiado(email = it, pass = password)
             }
@@ -92,55 +102,10 @@ fun Login(
             Password(password) {
                 loginViewModel.onRegistroCambiado(email = email, pass = it)
             }
-            Registrar(isLoginEnable){
-                Log.e("Fernando","${nombre}, ${password}, ${email}")
-                try {
-                    Amplify.Auth.signUp(
-                        email,
-                        password,
-                        AuthSignUpOptions.builder()
-                            .userAttribute(AuthUserAttributeKey.email(), email)
-                            .userAttribute(AuthUserAttributeKey.name(), nombre).build(),
-                        { result ->
-                            //Las corrutinas son necesarias para que las variables se actualicen y puedan ser usadas en el finally.
-                            coroutineScope.launch {
-                                if (result.isSignUpComplete) {
-                                    Log.i("Fernando", "Signup ok")
-                                    loginViewModel.setRegistroCorrecto(1)
-                                    Toast.makeText(context, "Registro correcto", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    Log.i("Fernando", "Registro correcto, falta confirmación")
-                                    loginViewModel.setRegistroCorrecto(2)
-                                    Toast.makeText(context, "Registro correcto, falta confirmación", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        },
-                        { error ->
-                            coroutineScope.launch {
-                                Log.e("Fernando", "Error en el registro fallido: ", error)
-                                loginViewModel.setRegistroCorrecto(3)
-                                Toast.makeText(context, "Error grave en el registro", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    )
-                }
-                catch (e:Exception){
-                }
-                finally {
-                    if (isRegistroCorrecto == 1) {
-
-                    }
-                    if (isRegistroCorrecto == 2) {
-
-                    }
-                    if (isRegistroCorrecto == 3) {
-
-                    }
-                }
-            }
+            Spacer(modifier = Modifier.size(20.dp))
             Login(isLoginEnable){
                 //Bloque de Login
-                Log.e("Fernando","${nombre}, ${password}, ${email}")
+                Log.e("Sergio","${nombre}, ${password}, ${email}")
                 try {
                     //Callbacks
                     Amplify.Auth.signIn(
@@ -150,18 +115,24 @@ fun Login(
                             //Las corrutinas son necesarias para que funcione el Toast. En este ejemplo no uso variables como en el registro y llamo directamente al Toast.
                             coroutineScope.launch {
                                 if (result.isSignedIn) {
-                                    Log.i("Fernando", "Login correcto")
-                                    navController.navigate(Rutas.Principal)
-                                    Toast.makeText(context, "Login correcto", Toast.LENGTH_SHORT).show()
+                                    Log.i("Sergio", "Login correcto")
+
+                                    if (loginViewModel.getRolByEmail(email) == 1) {
+                                        navController.navigate(Rutas.EleccionAdministrador)
+                                    }else{
+                                        navController.navigate(Rutas.Principal)
+//                                      Toast.makeText(context, "Login correcto", Toast.LENGTH_SHORT).show()
+                                    }
+
                                 } else {
-                                    Log.e("Fernando", "Algo ha fallado en el login")
+                                    Log.e("Sergio", "Algo ha fallado en el login")
                                     Toast.makeText(context, "Algo ha fallado en el login", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         },
                         { error ->
                             coroutineScope.launch {
-                                Log.e("Fernando", error.toString())
+                                Log.e("Sergio error", error.toString())
                                 Toast.makeText(context, error.message,Toast.LENGTH_SHORT).show()
                             }
                         }
@@ -181,56 +152,31 @@ fun Login(
                     }
                 }
 
-                //Bloque de confirmación de login (comentar / descomentar).
-//                Amplify.Auth.confirmSignUp(
+            }
+            Spacer(modifier = Modifier.size(200.dp))
+            CerrarSesionYAplicacion(context = context)
+            crearCuenta {
+                navController.navigate(Rutas.CrearCuenta)
+            }
+//            Logout(isLogoutEnable){
+//                val options = AuthSignOutOptions.builder()
+//                    .globalSignOut(true)
+//                    .build()
 //
-//                    "faranzabe@cifpvirgendegracia.com", "325464",
-//
-//                    { result ->
-//
-//                        if (result.isSignUpComplete) {
-//
-//                            Log.i("Fernando", "Confirm signUp succeeded")
-//
-//                        } else {
-//
-//                            Log.i("Fernando","Confirm sign up not complete")
-//
+//                Amplify.Auth.signOut(options) { signOutResult ->
+//                    coroutineScope.launch {
+//                        if (signOutResult is AWSCognitoAuthSignOutResult.CompleteSignOut) {
+//                            Log.i("Fernando", "Logout correcto")
+//                            Toast.makeText(context,"Logout ok",Toast.LENGTH_SHORT).show()
+//                        } else if (signOutResult is AWSCognitoAuthSignOutResult.PartialSignOut) {
+//                        } else if (signOutResult is AWSCognitoAuthSignOutResult.FailedSignOut) {
+//                            Log.e("Fernando", "Algo ha fallado en el logout")
+//                            Toast.makeText(context,"Algo ha fallado en el logout",Toast.LENGTH_SHORT).show()
 //                        }
-//
-//                    },
-//
-//                    { Log.e("Fernando", "Failed to confirm sign up", it) }
-//
-//                )
+//                    }
+//                }
+//            }
 
-                //Bloque para reenviar el código de confirmación
-//                Amplify.Auth.resendUserAttributeConfirmationCode(
-//                    AuthUserAttributeKey.email(),
-//                    { Log.i("AuthDemo", "Code was sent again: $it") },
-//                    { Log.e("AuthDemo", "Failed to resend code", it) }
-//                )
-            }
-            Logout(isLogoutEnable){
-                val options = AuthSignOutOptions.builder()
-                    .globalSignOut(true)
-                    .build()
-
-                Amplify.Auth.signOut(options) { signOutResult ->
-                    coroutineScope.launch {
-                        if (signOutResult is AWSCognitoAuthSignOutResult.CompleteSignOut) {
-                            Log.i("Fernando", "Logout correcto")
-                            Toast.makeText(context,"Logout ok",Toast.LENGTH_SHORT).show()
-                        } else if (signOutResult is AWSCognitoAuthSignOutResult.PartialSignOut) {
-                        } else if (signOutResult is AWSCognitoAuthSignOutResult.FailedSignOut) {
-                            Log.e("Fernando", "Algo ha fallado en el logout")
-                            Toast.makeText(context,"Algo ha fallado en el logout",Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            }
-
-            CerrarSesion()
         }
 
     }
@@ -256,21 +202,23 @@ fun Logout(isLogoutEnable: Boolean, onClickAction: (Boolean) -> Unit){
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Nombre(nombre: String, onTextChanged: (String) -> Unit) {
-    TextField(
+    OutlinedTextField(
         value = nombre,
         onValueChange = { onTextChanged(it) },
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = Color(0xFFFAFAFA)),
-        placeholder = { Text(text = "Nick") },
-        label = {Text("Introduce un nick")},
+            .padding(bottom = 10.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .background(color = Color(0xFFE0E1EB)),
+        placeholder = { Text(text = "Nombre y apellidos") },
+        label = {Text("Introduce tu nombre y apellidos")},
         maxLines = 1,
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-        colors = TextFieldDefaults.textFieldColors(
-//            textColor = Color(0xFFB2B2B2),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+        textStyle = LocalTextStyle.current.copy(color = Color(0xFF000000)),
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = Color.Transparent,
+            unfocusedBorderColor = Color.Transparent
         )
     )
 }
@@ -283,16 +231,18 @@ fun Email(email: String, onTextChanged: (String) -> Unit) {
         onValueChange = { onTextChanged(it) },
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = Color(0xFFFAFAFA)),
+            .padding(bottom = 10.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .background(color = Color(0xFFE0E1EB)),
         placeholder = { Text(text = "Email") },
-        label = {Text("Introduce un correo")},
+        label = {Text("Introduce tu email")},
         maxLines = 1,
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-        colors = TextFieldDefaults.textFieldColors(
-//            textColor = Color(0xFFB2B2B2),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+        textStyle = LocalTextStyle.current.copy(color = Color(0xFF000000)),
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = Color.Transparent,
+            unfocusedBorderColor = Color.Transparent
         )
     )
 }
@@ -300,17 +250,19 @@ fun Email(email: String, onTextChanged: (String) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Password(password: String, onTextChanged: (String) -> Unit) {
-    var showPassword by remember { mutableStateOf(value = false) }
+    var showPassword by remember {mutableStateOf (value = false)}
+
     TextField(
         value = password,
         onValueChange = { onTextChanged(it) },
-        label = {Text("Introduce una clave")},
+        label = { Text("Introduce una contraseña") },
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = Color(0xFFFAFAFA)),
+            .padding(bottom = 10.dp)
+            .background(color = Color(0xFFFAFAFA))
+            .clip(MaterialTheme.shapes.medium),
         placeholder = { Text("Password") },
         colors = TextFieldDefaults.textFieldColors(
-//            textColor = Color(0xFFB2B2B2),
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         ),
@@ -318,21 +270,13 @@ fun Password(password: String, onTextChanged: (String) -> Unit) {
         maxLines = 1,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {
-            if (showPassword) {
-                IconButton(onClick = { showPassword = false }) {
-                    Icon(
-                        imageVector = Icons.Filled.Visibility,
-                        contentDescription = "hide_password"
-                    )
-                }
-            } else {
-                IconButton(
-                    onClick = { showPassword = true }) {
-                    Icon(
-                        imageVector = Icons.Filled.VisibilityOff,
-                        contentDescription = "hide_password"
-                    )
-                }
+            IconButton(
+                onClick = { showPassword = !showPassword }
+            ) {
+                Icon(
+                    imageVector = if (showPassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                    contentDescription = "toggle_password_visibility"
+                )
             }
         },
         visualTransformation = if (showPassword) {
@@ -344,10 +288,39 @@ fun Password(password: String, onTextChanged: (String) -> Unit) {
 }
 
 @Composable
-fun CerrarSesion(){
+fun CerrarAplicacion(){
     val activity = LocalContext.current as Activity
     Button(modifier = Modifier.fillMaxWidth(), onClick = { activity.finish() }) {
         Text(text = "Cerrar aplicación")
+    }
+}
+
+@Composable
+fun CerrarSesionYAplicacion(context: Context){
+    val activity = LocalContext.current as Activity
+    val coroutineScope = rememberCoroutineScope()
+
+    Button(modifier = Modifier.fillMaxWidth(), onClick = {
+        val options = AuthSignOutOptions.builder()
+            .globalSignOut(true)
+            .build()
+
+        Amplify.Auth.signOut(options) { signOutResult ->
+            coroutineScope.launch {
+                if (signOutResult is AWSCognitoAuthSignOutResult.CompleteSignOut) {
+                    Log.i("Fernando", "Logout correcto")
+                    Toast.makeText(context,"Logout ok", Toast.LENGTH_SHORT).show()
+                } else if (signOutResult is AWSCognitoAuthSignOutResult.PartialSignOut) {
+                } else if (signOutResult is AWSCognitoAuthSignOutResult.FailedSignOut) {
+                    Log.e("Fernando", "Algo ha fallado en el logout")
+                    Toast.makeText(context,"Algo ha fallado en el logout", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+//        activity.finish()
+         }) {
+        Text(text = "Cerrar aplicación")
+
     }
 }
 
@@ -375,13 +348,36 @@ fun Login(isRegistroEnable : Boolean, onClickAction: (Boolean) -> Unit){
             onClickAction(true);
         },
         enabled = isRegistroEnable,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)
+            .width(200.dp)
+            .height(50.dp),
         colors = ButtonDefaults.buttonColors(
             contentColor = Color.White,
             disabledContentColor = Color.White
         )
     ) {
         Text(text = "Login")
+    }
+}
+
+@Composable
+fun crearCuenta(onClickAction: (Boolean) -> Unit){
+    Button(
+        onClick = {
+            onClickAction(true);
+        },
+        modifier = Modifier
+            .padding(60.dp)
+            .width(300.dp)
+            .height(50.dp),
+        colors = ButtonDefaults.buttonColors(
+            contentColor = Color.White,
+            disabledContentColor = Color.White
+        )
+    ) {
+        Text(text = "Crear una cuenta")
     }
 }
 
