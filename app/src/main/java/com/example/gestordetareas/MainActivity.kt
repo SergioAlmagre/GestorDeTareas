@@ -19,10 +19,12 @@ import com.amplifyframework.api.aws.AWSApiPlugin
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.AWSDataStorePlugin
+import com.amplifyframework.storage.s3.AWSS3StoragePlugin
 import com.example.a2_practicamvvm.Rutas
 import com.example.gestordetareas.CrearCuenta.CrearCuenta
 import com.example.gestordetareas.CrearCuenta.CrearCuentaViewModel
 import com.example.gestordetareas.EleccionAdministrador.botonesSeleccion
+import com.example.gestordetareas.ListaUsuarios.ListadoUsuarios
 import com.example.gestordetareas.ListadoTareas.Listado
 import com.example.gestordetareas.ListadoTareas.ListadoTareasViewModel
 import com.example.gestordetareas.Login.Login
@@ -52,7 +54,15 @@ class MainActivity : ComponentActivity() {
                 ) {
 
                     val navController = rememberNavController()
-                    NavHost(navController = navController, startDestination = Rutas.EleccionAdministrador){
+                    NavHost(navController = navController, startDestination = Rutas.ListadoUsuarios){
+
+                        composable(Rutas.ListadoTareas){
+                            Listado(navController, princiaplVM, listadoVM)
+                        }
+
+                        composable(Rutas.ListadoUsuarios){
+                            ListadoUsuarios(navController)
+                        }
 
                         composable(Rutas.EleccionAdministrador){
                             botonesSeleccion(navController)
@@ -76,7 +86,7 @@ class MainActivity : ComponentActivity() {
                         Amplify.addPlugin(AWSApiPlugin()) // UNCOMMENT this line once backend is deployed
                         Amplify.addPlugin(AWSCognitoAuthPlugin())
                         Amplify.addPlugin(AWSDataStorePlugin())
-//                        Amplify.addPlugin(AWSS3StoragePlugin())
+                        Amplify.addPlugin(AWSS3StoragePlugin())
                         Amplify.configure(applicationContext)
                         Log.i("Sergio", "Initialized Amplify")
                     } catch (e: AmplifyException) {
