@@ -1,12 +1,13 @@
-package com.example.a2_practicamvvm
+package com.example.gestordetareas
 
 object Rutas {
-    val CrearCuenta = "CrearCuenta"
-    val Login = "Login"
-    val Principal = "Principal"
-    val ListadoTareas = "ListadoTaras"
-    val ListadoUsuarios = "ListadoUsuarios"
-    val EleccionAdministrador = "EleccionAdministrador"
+    val crearCuenta = "crearCuenta"
+    val crearTarea = "crearTarea"
+    val login = "login"
+    val principal = "principal"
+    val listadoTareas = "listadoTaras"
+    val listadoUsuarios = "listadoUsuarios"
+    val eleccionAdministrador = "eleccionAdministrador"
 
 
     //ROLES

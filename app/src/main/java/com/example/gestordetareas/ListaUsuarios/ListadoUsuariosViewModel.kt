@@ -8,7 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.amplifyframework.core.Amplify
-import com.example.gestordetareas.Usuario.Usuario
+import com.amplifyframework.datastore.generated.model.Usuario
 
 
 class ListadoUsuariosViewModel {
@@ -39,21 +39,21 @@ class ListadoUsuariosViewModel {
 
 
     fun getUsers() {
-        val _usuarios = mutableStateListOf<com.amplifyframework.datastore.generated.model.Usuario>()
+        usuarios.clear()  // Utiliza la variable de instancia, no una nueva variable local
 
-        _usuarios.clear()
         Amplify.DataStore.query(
             com.amplifyframework.datastore.generated.model.Usuario::class.java,
             { items ->
                 while (items.hasNext()) {
                     val item = items.next()
                     Log.i("Sergio", "Queried item: ${item.toString()}")
-                    _usuarios.add(item)
+                    usuarios.add(item)
                 }
             },
             { failure -> Log.e("Sergio", "Could not query DataStore", failure) }
         )
     }
+
 
 
 }

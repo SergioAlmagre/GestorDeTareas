@@ -50,9 +50,8 @@ import androidx.navigation.NavHostController
 import com.amplifyframework.auth.cognito.result.AWSCognitoAuthSignOutResult
 import com.amplifyframework.auth.options.AuthSignOutOptions
 import com.amplifyframework.core.Amplify
-import com.example.a2_practicamvvm.Rutas
+import com.example.gestordetareas.Rutas
 import com.example.gestordetareas.ListadoTareas.ListadoTareasViewModel
-import com.example.gestordetareas.Principal.PrincipalViewModel
 import android.content.Context
 
 
@@ -62,7 +61,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun Login(
     navController: NavHostController,
-    principalViewModel: PrincipalViewModel,
+
     listadoTareasViewModel: ListadoTareasViewModel,
     loginViewModel: LoginViewModel
 ) {
@@ -113,9 +112,9 @@ fun Login(
                                     Log.i("Sergio", "Login correcto")
 
                                     if (loginViewModel.getRolByEmail(email) == 1) {
-                                        navController.navigate(Rutas.EleccionAdministrador)
+                                        navController.navigate(Rutas.eleccionAdministrador)
                                     }else{
-                                        navController.navigate(Rutas.Principal)
+                                        navController.navigate(Rutas.principal)
 //                                      Toast.makeText(context, "Login correcto", Toast.LENGTH_SHORT).show()
                                     }
 
@@ -151,7 +150,7 @@ fun Login(
             Spacer(modifier = Modifier.size(200.dp))
             CerrarSesionYAplicacion(context = context)
             crearCuenta {
-                navController.navigate(Rutas.CrearCuenta)
+                navController.navigate(Rutas.crearCuenta)
             }
 //            Logout(isLogoutEnable){
 //                val options = AuthSignOutOptions.builder()

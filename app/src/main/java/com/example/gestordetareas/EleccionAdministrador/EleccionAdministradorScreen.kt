@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.a2_practicamvvm.Rutas
+import com.example.gestordetareas.Rutas
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,7 +27,7 @@ fun botonesSeleccion(navController: NavController){
             .fillMaxWidth()
     ) {
         Card(
-            onClick = { navController.navigate(Rutas.ListadoUsuarios) },
+            onClick = { navController.navigate(Rutas.listadoUsuarios) },
             modifier = Modifier
                 .padding(10.dp)
                 .width(400.dp)
@@ -44,7 +44,7 @@ fun botonesSeleccion(navController: NavController){
             }
         }
         Card(
-            onClick = { navController.navigate(Rutas.ListadoTareas) },
+            onClick = { navController.navigate(Rutas.listadoTareas) },
             modifier = Modifier
                 .padding(10.dp)
                 .width(400.dp)

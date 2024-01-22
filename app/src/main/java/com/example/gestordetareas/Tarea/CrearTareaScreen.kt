@@ -1,4 +1,4 @@
-package com.example.gestordetareas.Principal
+package com.example.gestordetareas.Tarea
 
 import android.app.Activity
 import android.content.Context
@@ -51,19 +51,21 @@ import androidx.navigation.NavHostController
 import com.amplifyframework.auth.cognito.result.AWSCognitoAuthSignOutResult
 import com.amplifyframework.auth.options.AuthSignOutOptions
 import com.amplifyframework.core.Amplify
-import com.example.a2_practicamvvm.Rutas
+import com.amplifyframework.datastore.generated.model.Tarea
+import com.example.gestordetareas.ElementosComunes.BotonCancelar
 import com.example.gestordetareas.ListadoTareas.ListadoTareasViewModel
-import com.example.gestordetareas.Tarea.Tarea
+import com.example.gestordetareas.Rutas
+import com.example.gestordetareas.Usuario.UsuarioViewModel
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun Principal(
+fun CrearTarea(
     navController: NavHostController,
-    principalViewModel: PrincipalViewModel,
+    tareaViewModel: TareaViewModel,
     listadoTareasViewModel: ListadoTareasViewModel
 ) {
-    val showDialog: Boolean by principalViewModel.showDialog.observeAsState(false)
+    val showDialog: Boolean by tareaViewModel.showDialog.observeAsState(false)
     var context = LocalContext.current
 
     Box(
@@ -72,32 +74,32 @@ fun Principal(
             .padding(8.dp)
     ) {
         Column {
-            Text("Bienvenido", fontSize = 20.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+            Text(
+                "Bienvenido",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
             //Body( navController, principalViewModel, listadoViewModel)
-            Column (modifier = Modifier
-                .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally){
-                AddTareaDialog(
-                    principalViewModel,
-                    showDialog,
-                    onDismiss = { principalViewModel.onDialogClose() },
-                    onTareaAdded = {
-                        principalViewModel.onDialogClose()
-                        listadoTareasViewModel.onTareaCreated(it)
-                    })
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+//                AddTareaDialog(
+//                    principalViewModel,
+//                    showDialog,
+//                    onDismiss = { principalViewModel.onDialogClose() },
+//                    onTareaAdded = {
+//                        principalViewModel.onDialogClose()
+//                        listadoTareasViewModel.onTareaCreated(it)
+//                    })
+//            }
+                Spacer(modifier = Modifier.size(300.dp))
+                BotonCancelar(navController = navController, ruta = Rutas.listadoTareas)
+
             }
-            Spacer(modifier = Modifier.size(300.dp))
-            IrListadoButton(){
-                navController.navigate(Rutas.ListadoTareas)
-            }
-            CerrarSesion(context)
-            Column (modifier = Modifier
-                .width(235.dp)
-                .padding(10.dp),
-                    horizontalAlignment = Alignment.End)
-                    {
-                        FloatingActionButtonabDialog(principalViewModel)
-                    }
         }
     }
 }
@@ -106,33 +108,45 @@ fun Principal(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTareaDialog(principalViewModel:PrincipalViewModel, show: Boolean, onDismiss: () -> Unit, onTareaAdded: (Tarea) -> Unit) {
-    val descripcion: String by principalViewModel.descripcion.observeAsState("")
-    val estimacionHoras:Double by principalViewModel.estimacionHoras.observeAsState(0.0)
-    val horasInvertidas:Double by principalViewModel.horasInvertidas.observeAsState(0.0)
-    val dificultad: String by principalViewModel.dificultad.observeAsState("")
-    val estaFinalizada:Boolean by principalViewModel.estaFinalizada.observeAsState(false)
-    val estaAsignada:Boolean by principalViewModel.estaAsignada.observeAsState(false)
+fun AddTareaDialog(
+    usuarioViewModel: UsuarioViewModel,
+    tareaViewModel: TareaViewModel,
+    show: Boolean,
+    onDismiss: () -> Unit,
+    onTareaAdded: (Tarea) -> Unit
+) {
+    val idUser: String by usuarioViewModel.id.observeAsState("")
+    val descripcion: String by tareaViewModel.descripcion.observeAsState("")
+    val estimacionHoras: Double by tareaViewModel.estimacionHoras.observeAsState(0.0)
+    val horasInvertidas: Double by tareaViewModel.horasInvertidas.observeAsState(0.0)
+    val dificultad: String by tareaViewModel.dificultad.observeAsState("")
+    val estaFinalizada: Boolean by tareaViewModel.estaFinalizada.observeAsState(false)
+    val estaAsignada: Boolean by tareaViewModel.estaAsignada.observeAsState(false)
 
 
     //En lugar de Dialog se puede usar Popup.
     if (show) {
-        Dialog(onDismissRequest = { onDismiss() },
+        Dialog(
+            onDismissRequest = { onDismiss() },
 
             //properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false) ) {
-            properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false) ) {
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
+        ) {
             Column(
-            modifier = Modifier
+                modifier = Modifier
 //                .height(450.dp)
-                .background(Color.White)
-                .padding(20.dp)
-                ) {
-                TituloDialogo(texto = "Nueva tarea")
+                    .background(Color.White)
+                    .padding(20.dp)
+            ) {
+//                TituloDialogo(texto = "Nueva tarea")
                 Spacer(modifier = Modifier.size(10.dp))
                 Text("Descripción:")
                 TextField(
                     value = descripcion,
-                    onValueChange = { principalViewModel.cambiarDescripcion(it) },
+                    onValueChange = { tareaViewModel.cambiarDescripcion(it) },
                     singleLine = true,
                     maxLines = 1
                 )
@@ -141,35 +155,35 @@ fun AddTareaDialog(principalViewModel:PrincipalViewModel, show: Boolean, onDismi
                 TextField(
                     value = estimacionHoras.toString(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    onValueChange = { principalViewModel.cambiarEstimacionHoras(it) },
+                    onValueChange = { tareaViewModel.cambiarEstimacionHoras(it) },
                     singleLine = true,
                     maxLines = 1
                 )
                 Spacer(modifier = Modifier.size(10.dp))
                 Text("Dificultad:")
 
-                principalViewModel.cambiarDificultad(dificualtadList())
+//                principalViewModel.cambiarDificultad(dificualtadList())
 
                 Spacer(modifier = Modifier.size(10.dp))
-                    Row (
-                        verticalAlignment = Alignment.CenterVertically
-                    ){
-                        Spacer(modifier = Modifier.size(40.dp))
-                        Text("¿Completada?")
-                        Checkbox(
-                            checked = estaFinalizada,
-                            onCheckedChange = { principalViewModel.cambiarEsFinalizada(it) },
-                            modifier = Modifier.align(Alignment.CenterVertically)
-                        )
-                        Text("S/N")
-                    }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(modifier = Modifier.size(40.dp))
+                    Text("¿Completada?")
+                    Checkbox(
+                        checked = estaFinalizada,
+                        onCheckedChange = { tareaViewModel.cambiarEsFinalizada(it) },
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
+                    Text("S/N")
+                }
 
-                Row (
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(70.dp)
                         .padding(10.dp)
-                ){
+                ) {
                     Spacer(modifier = Modifier.size(20.dp))
                     Button(
                         onClick = {
@@ -180,26 +194,27 @@ fun AddTareaDialog(principalViewModel:PrincipalViewModel, show: Boolean, onDismi
                     }
                     Spacer(modifier = Modifier.size(30.dp))
                     Button(onClick = {
-                        val u = Tarea(descripcion,dificultad, estimacionHoras, horasInvertidas, estaAsignada, estaFinalizada)
-                        principalViewModel.crearTarea(descripcion, dificultad, estimacionHoras, horasInvertidas,  estaAsignada, estaFinalizada)
-                        onTareaAdded(u)
+//                        val t = Tarea(descripcion,dificultad,dificultad,estimacionHoras,horasInvertidas,estaAsignada,estaFinalizada, idUser)
+                        tareaViewModel.crearTarea(
+                            descripcion,
+                            dificultad,
+                            estimacionHoras,
+                            horasInvertidas,
+                            estaAsignada,
+                            estaFinalizada
+                        )
+//                        onTareaAdded(t)
 
-                    }){
+                    }) {
                         Text("Añadir")
                     }
-
                 }
-
-
             }
         }
     }
 }
 
-@Composable
-fun TituloDialogo(texto:String){
-    Text(text = texto, fontWeight = FontWeight.SemiBold, fontSize = 20.sp, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-}
+
 
 
 @Composable
@@ -218,53 +233,10 @@ fun IrListadoButton(onClickAction: (Boolean) -> Unit) {
     }
 }
 
-@Composable
-fun CerrarSesion(context: Context){
-    val activity = LocalContext.current as Activity
-    val coroutineScope = rememberCoroutineScope()
 
-    Button(modifier = Modifier.fillMaxWidth(), onClick = {
-        val options = AuthSignOutOptions.builder()
-            .globalSignOut(true)
-            .build()
-
-        Amplify.Auth.signOut(options) { signOutResult ->
-            coroutineScope.launch {
-                if (signOutResult is AWSCognitoAuthSignOutResult.CompleteSignOut) {
-                    Log.i("Fernando", "Logout correcto")
-                    Toast.makeText(context,"Logout ok", Toast.LENGTH_SHORT).show()
-                } else if (signOutResult is AWSCognitoAuthSignOutResult.PartialSignOut) {
-                } else if (signOutResult is AWSCognitoAuthSignOutResult.FailedSignOut) {
-                    Log.e("Fernando", "Algo ha fallado en el logout")
-                    Toast.makeText(context,"Algo ha fallado en el logout", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        activity.finish() }) {
-        Text(text = "Cerrar aplicación")
-
-    }
-}
 
 @Composable
-fun FloatingActionButtonabDialog(principalViewModel: PrincipalViewModel) {
-    val miniFabSize = 40.dp
-    FloatingActionButton(
-        onClick = {
-            principalViewModel.onShowDialogClick()
-        },
-        elevation = FloatingActionButtonDefaults.elevation(16.dp),
-        modifier = Modifier
-            .size(miniFabSize)
-            .fillMaxWidth()
-        ) {
-            Icon(Icons.Filled.Add, contentDescription = "Añadir usuario")
-        }
-}
-
-@Composable
-fun dificualtadList():String {
+fun dificualtadList(): String {
     var soChoosed by remember {
         mutableStateOf("")
     }
@@ -301,4 +273,36 @@ fun dificualtadList():String {
     }
     return soChoosed
 }
+
+
+
+
+//    @Composable
+//    fun FloatingActionButtonabDialog(tareaViewModel: TareaViewModel) {
+//        val miniFabSize = 40.dp
+//        FloatingActionButton(
+//            onClick = {
+//                tareaViewModel.onShowDialogClick()
+//            },
+//            elevation = FloatingActionButtonDefaults.elevation(16.dp),
+//            modifier = Modifier
+//                .size(miniFabSize)
+//                .fillMaxWidth()
+//        ) {
+//            Icon(Icons.Filled.Add, contentDescription = "Añadir usuario")
+//        }
+//    }
+
+
+//    @Composable
+//    fun TituloDialogo(texto: String) {
+//        Text(
+//            text = texto,
+//            fontWeight = FontWeight.SemiBold,
+//            fontSize = 20.sp,
+//            modifier = Modifier.fillMaxWidth(),
+//            textAlign = TextAlign.Center
+//        )
+//    }
+
 

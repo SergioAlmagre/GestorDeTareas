@@ -32,10 +32,14 @@ class UsuarioViewModel {
     private val _isRegistroCorrecto = MutableLiveData<Int>()
     val isRegistroCorrecto : LiveData<Int> = _isRegistroCorrecto
 
+    private val _id = MutableLiveData<String>()
+    val id : LiveData<String> = _id
+
 
     fun cambiarNombre(it: String) {
         this._nombreCompleto.value = it
     }
+
 
     fun cambiarEmail(it: String) {
         this._email.value = it

@@ -58,8 +58,8 @@ import com.amplifyframework.auth.AuthUserAttributeKey
 import com.amplifyframework.auth.options.AuthSignUpOptions
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.generated.model.Usuario
-import com.example.a2_practicamvvm.Rutas
-
+import com.example.gestordetareas.ElementosComunes.BotonCancelar
+import com.example.gestordetareas.Rutas
 import com.example.gestordetareas.Usuario.UsuarioViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -164,7 +164,7 @@ fun CrearCuenta(
                                         coroutineScope.launch {
                                             if (result.isSignedIn) {
                                                 Log.i("Fernando", "Login correcto")
-                                                navController.navigate(Rutas.Principal)
+                                                navController.navigate(Rutas.principal)
                                                 Toast.makeText(context, "Login correcto", Toast.LENGTH_SHORT).show()
                                             } else {
                                                 Log.e("Fernando", "Algo ha fallado en el login")
@@ -219,7 +219,7 @@ fun CrearCuenta(
                                         usu).thenAccept { success ->
                                         if (success) {
                                             GlobalScope.launch(Dispatchers.Main) {//Para que se ejecute en el hilo principal
-                                                navController.navigate(Rutas.Principal)
+                                                navController.navigate(Rutas.principal)
                                             }
 
                                         } else {
@@ -260,10 +260,9 @@ fun CrearCuenta(
             }
             ReenviarCodigoVerificacion()
             Spacer(modifier = Modifier.size(40.dp))
-            Cancelar(navController)
+            BotonCancelar(navController, Rutas.login)
 
         }
-
     }
 }
 
@@ -421,19 +420,7 @@ fun CodigoVerificacionBox(codigoVerificacion: String, onTextChanged: (String) ->
 }
 
 
-@Composable
-fun Cancelar(navController: NavHostController) {
-    Button(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = { navController.navigate(Rutas.Login) },
-        colors = ButtonDefaults.buttonColors(
-            contentColor = Color.White,
-            disabledContentColor = Color.White
-        )
-    ) {
-        Text(text = "Cancelar")
-    }
-}
+
 
 @Composable
 fun RegistrarYEnviarCodVerificacion(isRegistroEnable : Boolean, onClickAction: (Boolean) -> Unit){

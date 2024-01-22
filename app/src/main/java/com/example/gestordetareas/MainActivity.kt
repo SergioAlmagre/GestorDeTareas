@@ -19,26 +19,26 @@ import com.amplifyframework.api.aws.AWSApiPlugin
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.AWSDataStorePlugin
-import com.amplifyframework.storage.s3.AWSS3StoragePlugin
-import com.example.a2_practicamvvm.Rutas
 import com.example.gestordetareas.CrearCuenta.CrearCuenta
 import com.example.gestordetareas.CrearCuenta.CrearCuentaViewModel
 import com.example.gestordetareas.EleccionAdministrador.botonesSeleccion
 import com.example.gestordetareas.ListaUsuarios.ListadoUsuarios
-import com.example.gestordetareas.ListadoTareas.Listado
+
+import com.example.gestordetareas.ListadoTareas.ListadoTareas
 import com.example.gestordetareas.ListadoTareas.ListadoTareasViewModel
 import com.example.gestordetareas.Login.Login
-import com.example.gestordetareas.Principal.Principal
-import com.example.gestordetareas.Principal.PrincipalViewModel
+
 import com.example.gestordetareas.Usuario.UsuarioViewModel
 import com.example.gestordetareas.ui.theme.GestorDeTareasTheme
 
 import com.example.gestordetareas.Login.LoginViewModel
+import com.example.gestordetareas.Tarea.CrearTarea
+import com.example.gestordetareas.Tarea.TareaViewModel
 
 class MainActivity : ComponentActivity() {
-    val princiaplVM = PrincipalViewModel()
     val listadoVM = ListadoTareasViewModel()
     val usuarioVM = UsuarioViewModel()
+    val tareaVM = TareaViewModel()
     val loginVM = LoginViewModel()
     val crearCuentaVM = CrearCuentaViewModel()
 
@@ -54,39 +54,38 @@ class MainActivity : ComponentActivity() {
                 ) {
 
                     val navController = rememberNavController()
-                    NavHost(navController = navController, startDestination = Rutas.ListadoUsuarios){
-
-                        composable(Rutas.ListadoTareas){
-                            Listado(navController, princiaplVM, listadoVM)
+                    NavHost(navController = navController, startDestination = Rutas.crearTarea){
+                        
+                        composable(Rutas.crearTarea){
+                            CrearTarea(navController, tareaVM, listadoVM)
                         }
 
-                        composable(Rutas.ListadoUsuarios){
+                        composable(Rutas.listadoTareas){
+                            ListadoTareas(navController, listadoVM)
+                        }
+
+                        composable(Rutas.listadoUsuarios){
                             ListadoUsuarios(navController)
                         }
 
-                        composable(Rutas.EleccionAdministrador){
+                        composable(Rutas.eleccionAdministrador){
                             botonesSeleccion(navController)
                         }
 
-                        composable(Rutas.CrearCuenta){
+                        composable(Rutas.crearCuenta){
                             CrearCuenta(navController,usuarioVM, crearCuentaVM )
                         }
 
-                        composable(Rutas.Login){
-                            Login(navController, princiaplVM, listadoVM, loginVM)
+                        composable(Rutas.login){
+                            Login(navController, listadoVM, loginVM)
                         }
-                        composable(Rutas.Principal){
-                            Principal(navController, princiaplVM, listadoVM)
-                        }
-                        composable(Rutas.ListadoTareas){
-                            Listado(navController, princiaplVM, listadoVM)
-                        }
+
                     }
                     try{
                         Amplify.addPlugin(AWSApiPlugin()) // UNCOMMENT this line once backend is deployed
                         Amplify.addPlugin(AWSCognitoAuthPlugin())
                         Amplify.addPlugin(AWSDataStorePlugin())
-                        Amplify.addPlugin(AWSS3StoragePlugin())
+//                        Amplify.addPlugin(AWSS3StoragePlugin())
                         Amplify.configure(applicationContext)
                         Log.i("Sergio", "Initialized Amplify")
                     } catch (e: AmplifyException) {

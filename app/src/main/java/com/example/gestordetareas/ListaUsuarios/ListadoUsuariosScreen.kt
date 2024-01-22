@@ -12,12 +12,12 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.ExitToApp
@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -64,12 +63,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.amplifyframework.datastore.generated.model.Usuario
 import com.example.gestordetareas.R
-import com.example.gestordetareas.Usuario.Usuario
+//import com.example.gestordetareas.Usuario.Usuario
 import kotlinx.coroutines.launch
 
 
@@ -130,7 +131,7 @@ fun ListadoUsuarios(navController: NavController){
                 SnackbarHost(hostState = snackbarHostState)
             },
             topBar = {
-                MiToolBar("Pantalla principal", drawerState, expanded, {
+                MiToolBar("                     Usuarios", drawerState, expanded, {
                     Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
                 },
                     {
@@ -160,7 +161,8 @@ fun ListadoUsuarios(navController: NavController){
 
             Column(modifier = Modifier.padding(padding)) {
 
-                RVUsuariosSticky(listadoUsuariosViewModel = ListadoUsuariosViewModel())
+
+            RVUsuariosSticky(listadoUsuariosViewModel = ListadoUsuariosViewModel())
 
 
             }
@@ -177,32 +179,45 @@ fun ListadoUsuarios(navController: NavController){
 @Composable
 fun RVUsuariosSticky(listadoUsuariosViewModel: ListadoUsuariosViewModel) {
     val context = LocalContext.current
-    val usuariosMostrar = listadoUsuariosViewModel.getUsers().groupBy { it.nombreCompleto }
+
+    listadoUsuariosViewModel.getUsers()
+
+    val usuariosAgrupados = listadoUsuariosViewModel.usuarios.groupBy { it.nombreCompleto }
+    Log.i("Sergio_usuariosMostrar", usuariosAgrupados.toString())
+
     LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
 
-        usuariosMostrar.forEach{nombreCompleto, miUsuario ->
+        usuariosAgrupados.forEach { (nombreCompleto, listaUsuarios) ->
             stickyHeader {
-                Text(text =nombreCompleto, modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = Color.LightGray), fontSize = 18.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                Text(
+                    text = nombreCompleto,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(color = Color.LightGray),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
             }
-            items(miUsuario){
-                ItemUsuarioLista(u = it){usu, tipo -> //Llamada a la función lamda clickable del card en ItemUsuario.
+            items(listaUsuarios) {
+                ItemUsuarioLista(u = it) { usu, tipo ->
+                    //Llamada a la función lambda clickable del card en ItemUsuario.
                     if (tipo == 1) {//Click
-                        Log.e("Fernando","Click pulsado")
+                        Log.e("Fernando", "Click pulsado")
                         Toast.makeText(context, "Usuario seleccionado: $usu", Toast.LENGTH_SHORT).show()
                     }
-                    if (tipo == 2){//Long click
-                        Log.e("Fernando","Long click pulsado")
+                    if (tipo == 2) {//Long click
+                        Log.e("Fernando", "Long click pulsado")
                     }
-                    if (tipo == 3){//Long click
-                        Log.e("Fernando","Double click pulsado")
+                    if (tipo == 3) {//Long click
+                        Log.e("Fernando", "Double click pulsado")
                     }
                 }
             }
         }
     }
 }
+
 
 
 
@@ -265,7 +280,7 @@ fun ItemUsuario(u : Usuario, onItemSeleccionado:(Usuario)->Unit){
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ItemUsuarioLista(u : Usuario, onItemSeleccionado:(Usuario, Int)->Unit){
+fun ItemUsuarioLista(u: Usuario, onItemSeleccionado:(Usuario, Int)->Unit){
     var isLongClick by remember { mutableStateOf(false) }
     var isClick by remember { mutableStateOf(false) }
     var isDoubleClick by remember { mutableStateOf(false) }
@@ -276,17 +291,17 @@ fun ItemUsuarioLista(u : Usuario, onItemSeleccionado:(Usuario, Int)->Unit){
             .fillMaxWidth()
             .combinedClickable(
                 onDoubleClick = {
-                    Log.e("Fernando", "Doble click pulsado")
+                    Log.e("Sergio", "Doble click pulsado")
                     isDoubleClick = true
                     onItemSeleccionado(u, 3)
                 },
                 onLongClick = {
-                    Log.e("Fernando", "LongPress pulsado")
+                    Log.e("Sergio", "LongPress pulsado")
                     isLongClick = true
                     onItemSeleccionado(u, 2)
                 },
                 onClick = {
-                    Log.e("Fernando", "Click pulsado")
+                    Log.e("Sergio", "Click pulsado")
                     isClick = true
                     onItemSeleccionado(u, 1)
                 }
@@ -297,7 +312,7 @@ fun ItemUsuarioLista(u : Usuario, onItemSeleccionado:(Usuario, Int)->Unit){
             .padding(top = 1.dp, bottom = 1.dp, start = 1.dp, end = 1.dp)
     )
     {
-        if(u.fotoPerfil != null){
+        if(u.fotoPerfil.isEmpty()){
             Image(painter = painterResource(id = R.drawable.ic_launcher_foreground), contentDescription = "Avatar",
                 modifier = Modifier
                     .size(50.dp)
@@ -309,14 +324,14 @@ fun ItemUsuarioLista(u : Usuario, onItemSeleccionado:(Usuario, Int)->Unit){
             .padding(2.dp)
             .combinedClickable(
                 onDoubleClick = {
-                    Log.e("Fernando", "Doble click pulsado")
+                    Log.e("Sergio", "Doble click pulsado")
                 },
                 onLongClick = {
-                    Log.e("Fernando", "LongPress pulsado")
+                    Log.e("Sergio", "LongPress pulsado")
                     isLongClick = true
                 },
                 onClick = {
-                    Log.e("Fernando", "Click pulsado")
+                    Log.e("Sergio", "Click pulsado")
                 }
             ))
         Button(onClick = {onItemSeleccionado(u,1) }) {
@@ -327,8 +342,8 @@ fun ItemUsuarioLista(u : Usuario, onItemSeleccionado:(Usuario, Int)->Unit){
 
 
 fun generarOpcionesMenu() : ArrayList<OpcionMenu> {
-    var titulos = listOf("Manual", "Statistics", "Summary", "Exit")
-    var iconos =  listOf(Icons.Default.Home, Icons.Default.Search, Icons.Default.ArrowForward, Icons.Default.ExitToApp)
+    var titulos = listOf("Volver", "Todas", "Realizadas", "Sin realizar", "Sin asignar", "De usuario")
+    var iconos =  listOf(Icons.Default.Home, Icons.Default.Search, Icons.Default.ArrowForward, Icons.Default.ExitToApp, Icons.Default.ExitToApp, Icons.Default.ExitToApp)
     var opciones= ArrayList<OpcionMenu>()
     for(i in 0..titulos.size-1){
         opciones.add(OpcionMenu(titulos.get(i), iconos.get(i)))
@@ -353,7 +368,7 @@ fun MiToolBar(
 
     TopAppBar(
         colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = Color(0xffbbdefb),
+            containerColor = Color(0xFFFFF2CA),
             titleContentColor = Color.Black,
             actionIconContentColor = Color.Black,
             navigationIconContentColor = Color.Black,
@@ -372,28 +387,28 @@ fun MiToolBar(
             }
         },
         actions = {
-            IconButton(onClick = { onMarkerClick("M") }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "Leer después"
-                )
-            }
-            IconButton(onClick = { onShareClick("S") }) {
-                Icon(imageVector = Icons.Filled.Share, contentDescription = "Compartir")
-            }
+//            IconButton(onClick = { onMarkerClick("M") }) {
+//                Icon(
+//                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+//                    contentDescription = "Leer después"
+//                )
+//            }
+//            IconButton(onClick = { onShareClick("S") }) {
+//                Icon(imageVector = Icons.Filled.Share, contentDescription = "Compartir")
+//            }
+//
+//            IconButton(onClick = {
+//                exp = true
+//                onSettingClick("...")
+//            }) {
+//                Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Ver más")
+//            }
 
-            IconButton(onClick = {
-                exp = true
-                onSettingClick("...")
-            }) {
-                Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Ver más")
-            }
-
-            MiDropDown(exp, {
-                exp = it
-            }){
-                Toast.makeText(context, "Seleccionado $it",Toast.LENGTH_SHORT).show()
-            }
+//            MiDropDown(exp, {
+//                exp = it
+//            }){
+//                Toast.makeText(context, "Seleccionado $it",Toast.LENGTH_SHORT).show()
+//            }
         }
     )
 
