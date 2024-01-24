@@ -3,14 +3,13 @@ package com.example.gestordetareas.ListaUsuarios
 import android.app.Activity
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,10 +22,8 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerState
@@ -54,7 +51,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -63,20 +60,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.amplifyframework.datastore.generated.model.Usuario
+import com.example.gestordetareas.Almacen
 import com.example.gestordetareas.R
+import com.example.gestordetareas.Rutas
+import com.example.gestordetareas.Usuario.UsuarioViewModel
 //import com.example.gestordetareas.Usuario.Usuario
 import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListadoUsuarios(navController: NavController){
+fun ListadoUsuarios(navController: NavController, listadoUsuariosViewModel: ListadoUsuariosViewModel, usuarioViewModel: UsuarioViewModel){
     // Variables necesarias para ModalNavigationDrawer y ModalDrawerSheet
     var snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -158,13 +156,8 @@ fun ListadoUsuarios(navController: NavController){
             },
         )
         { padding ->
-
             Column(modifier = Modifier.padding(padding)) {
-
-
-            RVUsuariosSticky(listadoUsuariosViewModel = ListadoUsuariosViewModel())
-
-
+            RVUsuariosSticky(listadoUsuariosViewModel, navController, usuarioViewModel)
             }
         }
     }
@@ -174,26 +167,22 @@ fun ListadoUsuarios(navController: NavController){
 
 
 
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RVUsuariosSticky(listadoUsuariosViewModel: ListadoUsuariosViewModel) {
+fun RVUsuariosSticky(listadoUsuariosViewModel: ListadoUsuariosViewModel, navController: NavController, usuarioViewModel: UsuarioViewModel) {
     val context = LocalContext.current
 
-    listadoUsuariosViewModel.getUsers()
-
-    val usuariosAgrupados = listadoUsuariosViewModel.usuarios.groupBy { it.nombreCompleto }
+    val usuariosAgrupados = listadoUsuariosViewModel.usuarios.groupBy { it.nombreCompleto.first().toUpperCase() }
     Log.i("Sergio_usuariosMostrar", usuariosAgrupados.toString())
 
     LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-
-        usuariosAgrupados.forEach { (nombreCompleto, listaUsuarios) ->
+        usuariosAgrupados.forEach { (inicial, listaUsuarios) ->
             stickyHeader {
                 Text(
-                    text = nombreCompleto,
+                    text = inicial.toString(),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(color = Color.LightGray),
+                        .background(color = Color.White),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
@@ -204,10 +193,16 @@ fun RVUsuariosSticky(listadoUsuariosViewModel: ListadoUsuariosViewModel) {
                     //Llamada a la función lambda clickable del card en ItemUsuario.
                     if (tipo == 1) {//Click
                         Log.e("Fernando", "Click pulsado")
-                        Toast.makeText(context, "Usuario seleccionado: $usu", Toast.LENGTH_SHORT).show()
+//                        Almacen.usu = usu
+                        usuarioViewModel.establecerUsuarioActual(usu)
+                        Log.i("Sergio", "Usuario actual: ${usuarioViewModel.obtenerUsuarioActual()}")
+                        navController.navigate(Rutas.perfilUsuarioVistaAdministrador)
+
+//                        Toast.makeText(context, "Usuario seleccionado: $usu", Toast.LENGTH_SHORT).show()
                     }
                     if (tipo == 2) {//Long click
-                        Log.e("Fernando", "Long click pulsado")
+                        listadoUsuariosViewModel.borrarUsuario(usu)
+                        Log.e("Fernando", "Long click pulsado y borrado")
                     }
                     if (tipo == 3) {//Long click
                         Log.e("Fernando", "Double click pulsado")
@@ -223,6 +218,7 @@ fun RVUsuariosSticky(listadoUsuariosViewModel: ListadoUsuariosViewModel) {
 
 
 
+
 /**
  * Para mostrar la RV en columnas o en Grid.
  * En este ejemplo, el Modifier.pointerInput se utiliza para detectar gestos táctiles y el evento
@@ -230,115 +226,167 @@ fun RVUsuariosSticky(listadoUsuariosViewModel: ListadoUsuariosViewModel) {
  * un umbral, se considera como un "long click". El comportamiento real del "long click" se puede
  * personalizar según tus necesidades. En este caso, simplemente imprime un mensaje en el registro.
  */
+//@Composable
+//fun ItemUsuario(u : Usuario, onItemSeleccionado:(Usuario)->Unit){
+//    var isLongClick by remember { mutableStateOf(false) }
+//    var context = LocalContext.current
+//
+//    Card(border = BorderStroke(2.dp, Color.Blue),
+//        modifier = Modifier
+//            //.fillMaxWidth()
+//            .pointerInput(Unit) {
+//                detectTapGestures(
+//                    onPress = {
+//                        Log.e("Fernando", "Press pulsado")
+//                        onItemSeleccionado(u)
+//                    },
+//                    onTap = {
+//                        Log.e("Fernando", "Tap pulsado")
+//                    },
+//                    onLongPress = {
+//                        Log.e("Fernando", "LongPress pulsado")
+//
+//                        isLongClick = true
+//                    },
+//                    onDoubleTap = {
+//                        Log.e("Fernando", "DoubleTap pulsado")
+//                    }
+//                )
+//            } //Para que funcione pointerInput, debe estar comentado 'clickable'
+////            .clickable {
+////                onItemSeleccionado(u) //Función lamda llamada desde RVUsuarios.
+////            }
+//            .padding(top = 1.dp, bottom = 1.dp, start = 1.dp, end = 1.dp)
+//    )
+//    {
+//        Image(painter = painterResource(id = R.drawable.ic_launcher_foreground), contentDescription = "Avatar",
+//            modifier = Modifier
+//                .size(50.dp)
+//                .padding(8.dp)
+//        )
+//        Text(text = u.nombreCompleto, modifier = Modifier
+//            .align(CenterHorizontally)
+//            .padding(2.dp))
+//
+//        Button(onClick = {onItemSeleccionado(u) }) {
+//            Text(text = "Seleccionar")
+//        }
+//    }
+//}
+
+
 @Composable
-fun ItemUsuario(u : Usuario, onItemSeleccionado:(Usuario)->Unit){
-    var isLongClick by remember { mutableStateOf(false) }
-    var context = LocalContext.current
-
-    Card(border = BorderStroke(2.dp, Color.Blue),
-        modifier = Modifier
-            //.fillMaxWidth()
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        Log.e("Fernando", "Press pulsado")
-                        onItemSeleccionado(u)
-                    },
-                    onTap = {
-                        Log.e("Fernando", "Tap pulsado")
-                    },
-                    onLongPress = {
-                        Log.e("Fernando", "LongPress pulsado")
-                        isLongClick = true
-                    },
-                    onDoubleTap = {
-                        Log.e("Fernando", "DoubleTap pulsado")
-                    }
-                )
-            } //Para que funcione pointerInput, debe estar comentado 'clickable'
-//            .clickable {
-//                onItemSeleccionado(u) //Función lamda llamada desde RVUsuarios.
-//            }
-            .padding(top = 1.dp, bottom = 1.dp, start = 1.dp, end = 1.dp)
-    )
-    {
-        Image(painter = painterResource(id = R.drawable.ic_launcher_foreground), contentDescription = "Avatar",
-            modifier = Modifier
-                .size(50.dp)
-                .padding(8.dp)
-        )
-        Text(text = u.nombreCompleto, modifier = Modifier
-            .align(CenterHorizontally)
-            .padding(2.dp))
-
-        Button(onClick = {onItemSeleccionado(u) }) {
-            Text(text = "Seleccionar")
-        }
-    }
-}
-
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun ItemUsuarioLista(u: Usuario, onItemSeleccionado:(Usuario, Int)->Unit){
+fun ItemUsuarioLista(u: Usuario, onItemSeleccionado: (Usuario, Int) -> Unit) {
     var isLongClick by remember { mutableStateOf(false) }
     var isClick by remember { mutableStateOf(false) }
     var isDoubleClick by remember { mutableStateOf(false) }
     var context = LocalContext.current
+    var isSelected by remember { mutableStateOf(false) }
 
-    Card(border = BorderStroke(2.dp, Color.Blue),
+    // Variable para mostrar o no el diálogo de confirmación
+    var showDialog by remember { mutableStateOf(false) }
+
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .combinedClickable(
-                onDoubleClick = {
-                    Log.e("Sergio", "Doble click pulsado")
-                    isDoubleClick = true
-                    onItemSeleccionado(u, 3)
-                },
-                onLongClick = {
-                    Log.e("Sergio", "LongPress pulsado")
-                    isLongClick = true
-                    onItemSeleccionado(u, 2)
-                },
-                onClick = {
-                    Log.e("Sergio", "Click pulsado")
-                    isClick = true
-                    onItemSeleccionado(u, 1)
-                }
-            )//Para que funcione lo anterior se debe comentar lo de 'clickable'
-//            .clickable {
-//                    onItemSeleccionado(u,1) //Función lamda llamada desde RVUsuarios.
-//            }
             .padding(top = 1.dp, bottom = 1.dp, start = 1.dp, end = 1.dp)
-    )
-    {
-        if(u.fotoPerfil.isEmpty()){
-            Image(painter = painterResource(id = R.drawable.ic_launcher_foreground), contentDescription = "Avatar",
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(8.dp)
-            )
-        }
-        Text(text = u.nombreCompleto, modifier = Modifier
-            .align(CenterHorizontally)
-            .padding(2.dp)
-            .combinedClickable(
-                onDoubleClick = {
-                    Log.e("Sergio", "Doble click pulsado")
-                },
-                onLongClick = {
-                    Log.e("Sergio", "LongPress pulsado")
-                    isLongClick = true
-                },
-                onClick = {
-                    Log.e("Sergio", "Click pulsado")
+
+
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onPress = {
+
+                        },
+                        onTap = {
+                            Log.e("Fernando", "Tap pulsado")
+                            Log.e("Fernando", "Press pulsado")
+                            isClick = true
+                            onItemSeleccionado(u, 1)
+
+                        },
+                        onLongPress = {
+                            Log.e("Fernando", "LongPress pulsado")
+                            isLongClick = true
+                            // Mostrar el diálogo de confirmación al detectar una pulsación larga
+                            showDialog = true
+                        },
+                        onDoubleTap = {
+                            Log.e("Fernando", "DoubleTap pulsado")
+                            isDoubleClick = true
+                            onItemSeleccionado(u, 3)
+                        }
+                    )
                 }
-            ))
-        Button(onClick = {onItemSeleccionado(u,1) }) {
-            Text(text = "Seleccionar")
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(6.dp)
+                    .fillMaxWidth()
+            ) {
+                if (u.fotoPerfil.isNullOrEmpty()) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        contentDescription = "Avatar",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(8.dp)
+                    )
+                }
+                // Centro el nombre en el Row
+                Text(
+                    text = u.nombreCompleto,
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .align(Alignment.CenterVertically)
+                )
+            }
         }
     }
+
+    // Diálogo de confirmación
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                // Ocultar el diálogo cuando el usuario toca fuera de él
+                showDialog = false
+            },
+            title = {
+                Text(text = "Confirmación")
+            },
+            text = {
+                Text(text = "¿Estás seguro de que deseas realizar esta acción?")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        // Realizar la acción después de la confirmación
+                        onItemSeleccionado(u, 2)
+
+                        // Ocultar el diálogo
+                        showDialog = false
+                    }
+                ) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        // Cancelar la acción y cerrar el diálogo
+                        showDialog = false
+                    }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
+
 
 
 fun generarOpcionesMenu() : ArrayList<OpcionMenu> {
@@ -435,6 +483,7 @@ fun MiDropDown(isExpanded: Boolean, setExpanded: (Boolean) -> Unit, setSelected:
         }
     }
 }
+
 
 
 

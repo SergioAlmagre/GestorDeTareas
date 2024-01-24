@@ -1,5 +1,6 @@
 package com.example.gestordetareas
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -9,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
@@ -23,6 +25,7 @@ import com.example.gestordetareas.CrearCuenta.CrearCuenta
 import com.example.gestordetareas.CrearCuenta.CrearCuentaViewModel
 import com.example.gestordetareas.EleccionAdministrador.botonesSeleccion
 import com.example.gestordetareas.ListaUsuarios.ListadoUsuarios
+import com.example.gestordetareas.ListaUsuarios.ListadoUsuariosViewModel
 
 import com.example.gestordetareas.ListadoTareas.ListadoTareas
 import com.example.gestordetareas.ListadoTareas.ListadoTareasViewModel
@@ -32,40 +35,52 @@ import com.example.gestordetareas.Usuario.UsuarioViewModel
 import com.example.gestordetareas.ui.theme.GestorDeTareasTheme
 
 import com.example.gestordetareas.Login.LoginViewModel
+import com.example.gestordetareas.ModificarUsuario.ModUsuarioViewModel
+import com.example.gestordetareas.ModificarUsuario.ModificarUsuario
 import com.example.gestordetareas.Tarea.CrearTarea
 import com.example.gestordetareas.Tarea.TareaViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
-    val listadoVM = ListadoTareasViewModel()
+    val listadoTareasVM = ListadoTareasViewModel()
     val usuarioVM = UsuarioViewModel()
     val tareaVM = TareaViewModel()
     val loginVM = LoginViewModel()
     val crearCuentaVM = CrearCuentaViewModel()
+    val listadoUsuariosVM = ListadoUsuariosViewModel()
+    val modificarUsuarioVM = ModUsuarioViewModel()
 
+    @SuppressLint("CoroutineCreationDuringComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
             GestorDeTareasTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-
                     val navController = rememberNavController()
-                    NavHost(navController = navController, startDestination = Rutas.crearTarea){
+                    LaunchedEffect(true) {
+                        listadoUsuariosVM.getUsers()
+                    }
+
+                    NavHost(navController = navController, startDestination = Rutas.listadoUsuarios){
                         
                         composable(Rutas.crearTarea){
-                            CrearTarea(navController, tareaVM, listadoVM)
+                            CrearTarea(navController, tareaVM, listadoTareasVM)
                         }
 
                         composable(Rutas.listadoTareas){
-                            ListadoTareas(navController, listadoVM)
+                            ListadoTareas(navController, listadoTareasVM)
                         }
 
                         composable(Rutas.listadoUsuarios){
-                            ListadoUsuarios(navController)
+                            ListadoUsuarios(navController, listadoUsuariosVM, usuarioVM)
                         }
 
                         composable(Rutas.eleccionAdministrador){
@@ -77,7 +92,11 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(Rutas.login){
-                            Login(navController, listadoVM, loginVM)
+                            Login(navController, listadoTareasVM, loginVM)
+                        }
+
+                        composable(Rutas.perfilUsuarioVistaAdministrador){
+                            ModificarUsuario(navController, usuarioVM, modificarUsuarioVM)
                         }
 
                     }

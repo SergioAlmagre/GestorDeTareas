@@ -62,6 +62,7 @@ import com.amplifyframework.auth.cognito.result.AWSCognitoAuthSignOutResult
 import com.amplifyframework.auth.options.AuthSignOutOptions
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.generated.model.Tarea
+import com.example.gestordetareas.Almacen
 import com.example.gestordetareas.Rutas
 import com.example.gestordetareas.ListaUsuarios.ListadoUsuariosViewModel
 import com.example.gestordetareas.ListaUsuarios.MiToolBar

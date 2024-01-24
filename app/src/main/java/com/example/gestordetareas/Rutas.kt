@@ -8,6 +8,7 @@ object Rutas {
     val listadoTareas = "listadoTaras"
     val listadoUsuarios = "listadoUsuarios"
     val eleccionAdministrador = "eleccionAdministrador"
+    val perfilUsuarioVistaAdministrador = "perfilUsuarioVistaAdministrador"
 
 
     //ROLES

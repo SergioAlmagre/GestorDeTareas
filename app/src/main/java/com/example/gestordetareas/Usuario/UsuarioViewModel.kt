@@ -5,9 +5,17 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.generated.model.Usuario
+import com.example.gestordetareas.Rutas
 import java.util.concurrent.CompletableFuture
 
 class UsuarioViewModel {
+
+    private val _usuarioActual = MutableLiveData<Usuario?>()
+    val usuarioActual: LiveData<Usuario?> = _usuarioActual
+
+    private val _rol = MutableLiveData<Int>()
+    val rol: LiveData<Int> = _rol
+
     private val _nombreCompleto = MutableLiveData<String>()
     val nombreCompleto: LiveData<String> = _nombreCompleto
 
@@ -35,6 +43,45 @@ class UsuarioViewModel {
     private val _id = MutableLiveData<String>()
     val id : LiveData<String> = _id
 
+    private val _fotoPerfil = MutableLiveData<String>()
+    val fotoPerfil : LiveData<String> = _fotoPerfil
+
+    private val _tareasFinalizadas = MutableLiveData<Int>()
+    val tareasFinalizadas : LiveData<Int> = _tareasFinalizadas
+
+    fun guardarModificarUsuario(usuario: Usuario): CompletableFuture<Boolean> {
+        val completableFuture = CompletableFuture<Boolean>()
+
+        Amplify.DataStore.save(
+            usuario,
+            { success ->
+                println("Usuario guardado correctamente")
+                completableFuture.complete(true)
+            },
+            { error ->
+                println("Error al guardar el usuario: $error")
+                completableFuture.complete(false)
+            }
+        )
+
+        return completableFuture
+    }
+
+    fun cambiarId(it: String) {
+        this._id.value = it
+    }
+
+    fun establecerUsuarioActual(usuario: Usuario) {
+        _usuarioActual.value = usuario
+    }
+
+    fun obtenerUsuarioActual(): Usuario? {
+        return _usuarioActual.value
+    }
+
+    fun cambiarRol(it: Int) {
+        this._rol.value = it
+    }
 
     fun cambiarNombre(it: String) {
         this._nombreCompleto.value = it
