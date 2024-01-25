@@ -5,8 +5,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.model.query.Where
+import com.amplifyframework.datastore.generated.model.Tarea
 
 class TareaViewModel {
+
+    private val _idUsuarioAsignado = MutableLiveData<String>()
+    val idUsuarioAsignado: LiveData<String> = _idUsuarioAsignado
+
+    private val _tareaActual = MutableLiveData<Tarea>()
+    val tareaActual: LiveData<Tarea> = _tareaActual
 
     private val _porcentaje = MutableLiveData<Int>()
     val porcentaje: LiveData<Int> = _porcentaje
@@ -40,6 +47,14 @@ class TareaViewModel {
         _showDialog.value = false
     }
 
+    fun setIdUsuarioAsignado(id: String?) {
+        this._idUsuarioAsignado.value = id
+    }
+
+    fun cambiarEstaAsignada(it: Boolean) {
+        this._estaAsignada.value = it
+    }
+
     fun onShowDialogClick() {
         _showDialog.value = true
     }
@@ -56,7 +71,7 @@ class TareaViewModel {
 
     fun cambiarHorasInvertidas(e: String) {
         val doubleValue = e.toDoubleOrNull() ?: 0.0
-        this._estimacionHoras.value = doubleValue
+        this._horasInvertidas.value = doubleValue
     }
 
     fun cambiarDificultad(it: String) {
@@ -151,5 +166,13 @@ class TareaViewModel {
             asignada = estaAsignada
         }
         return asignada
+    }
+
+    fun getDescripcionDeTareaActual(): String {
+        var descripcion = ""
+        if(_tareaActual.value != null){
+            descripcion = _tareaActual.value!!.descripcion
+        }
+        return descripcion
     }
 }

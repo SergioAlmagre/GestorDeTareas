@@ -1,10 +1,8 @@
 package com.example.gestordetareas.ListadoTareas
 
 import android.app.Activity
-import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,8 +17,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AllInclusive
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ExitToApp
@@ -33,7 +29,6 @@ import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -56,84 +51,123 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.amplifyframework.auth.cognito.result.AWSCognitoAuthSignOutResult
-import com.amplifyframework.auth.options.AuthSignOutOptions
-import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.generated.model.Tarea
 import com.example.gestordetareas.ListaUsuarios.MiToolBar
 import com.example.gestordetareas.ListaUsuarios.OpcionMenu
-import com.example.gestordetareas.ListaUsuarios.generarOpcionesMenuUsuarios
 import com.example.gestordetareas.Rutas
+import com.example.gestordetareas.Usuario.UsuarioViewModel
 import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListadoTareas(navController: NavController, listadoTareasViewModel: ListadoTareasViewModel){
-    // Variables necesarias para ModalNavigationDrawer y ModalDrawerSheet
+fun ListadoTareas(usuarioViewModel: UsuarioViewModel ,navController: NavController, listadoTareasViewModel: ListadoTareasViewModel){
     var snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val opcs = generarOpcionesMenuTareas()
-    var selectedItemMiOpcion by remember { mutableStateOf(opcs[0]) }
+    val opcsAdmin = generarOpcionesMenuTareasAdministrador()
+    val opcsProg = generarOpcionesMenuTareasProgramador()
+    var selectedItemMiOpcion by remember { mutableStateOf(opcsAdmin[0]) }
     var scope = rememberCoroutineScope()
     var expanded by remember { mutableStateOf(false) }
+
+    usuarioViewModel.cambiarRol(Rutas.rolAdministrador) // TESSSSST!!!!!!!!!!!!!!!!!!
+    usuarioViewModel.cambiarId("1") // TESSSSST!!!!!!!!!!!!!!!!!!
 
     val act = LocalContext.current as Activity
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
         ModalDrawerSheet {
             Spacer(Modifier.height(12.dp))
 
-            opcs.forEach {
-                NavigationDrawerItem(
-                    icon = { Icon(it.icono, contentDescription = it.opcion) },
-                    label = { Text(it.opcion) },
-                    selected = it.opcion == selectedItemMiOpcion.opcion,
-                    onClick = {
-                        scope.launch {
-                            drawerState.close()
-                        }
-                        selectedItemMiOpcion = it //Aquí obtenemos el seleccionado.
+            if(usuarioViewModel.rol.value == Rutas.rolAdministrador){
+                opcsAdmin.forEach {
+                    NavigationDrawerItem(
+                        icon = { Icon(it.icono, contentDescription = it.opcion) },
+                        label = { Text(it.opcion) },
+                        selected = it.opcion == selectedItemMiOpcion.opcion,
+                        onClick = {
+                            scope.launch {
+                                drawerState.close()
+                            }
+                            selectedItemMiOpcion = it //Aquí obtenemos el seleccionado.
 //                            OpcionElegida.eleccion = it.opcion
 
-                        if (selectedItemMiOpcion.opcion == "Volver") {
-                            navController.navigate(Rutas.eleccionAdministrador)
+                            if (selectedItemMiOpcion.opcion == "Volver") {
+                                navController.navigate(Rutas.eleccionAdministrador)
 
-                        }
-                        if (selectedItemMiOpcion.opcion == "Todas") {
+                            }
+                            if (selectedItemMiOpcion.opcion == "Crear tarea") {
+                                listadoTareasViewModel.establecerTareaActual(listadoTareasViewModel.obatenerTareaVacia())
+                                navController.navigate(Rutas.verTarea)
+
+                            }
+                            if (selectedItemMiOpcion.opcion == "Todas") {
+                                listadoTareasViewModel.getTodasLasTareas()
+
+                            }
+                            if (selectedItemMiOpcion.opcion == "Realizadas") {
+                                listadoTareasViewModel.getTareasRealizadas()
+
+                            }
+                            if (selectedItemMiOpcion.opcion == "Sin asignar") {
+                                listadoTareasViewModel.getTareasSinAsignar()
+
+                            }
+                            if (selectedItemMiOpcion.opcion == "De usuario") {
+                                listadoTareasViewModel.getTareasDeUsuarioPorId("1")
+                            }
+
+                            if (selectedItemMiOpcion.opcion == "Mis datos") {
 
 
-                        }
-                        if (selectedItemMiOpcion.opcion == "Realizadas") {
+                            }
+                            if (selectedItemMiOpcion.opcion == "Cerrar sesión") {
+                                listadoTareasViewModel.cerrarSesiónList()
+                                act.finish()
+                            }
 
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+                }
+            }
+            if(usuarioViewModel.rol.value == Rutas.rolProgramador){
+                opcsProg.forEach {
+                    NavigationDrawerItem(
+                        icon = { Icon(it.icono, contentDescription = it.opcion) },
+                        label = { Text(it.opcion) },
+                        selected = it.opcion == selectedItemMiOpcion.opcion,
+                        onClick = {
+                            scope.launch {
+                                drawerState.close()
+                            }
+                            selectedItemMiOpcion = it //Aquí obtenemos el seleccionado.
+//                            OpcionElegida.eleccion = it.opcion
 
-                        }
-                        if (selectedItemMiOpcion.opcion == "Sin asignar") {
-                            act.finish()
-                        }
-                        if (selectedItemMiOpcion.opcion == "De usuario") {
+                            if (selectedItemMiOpcion.opcion == "Todas") {
+                                listadoTareasViewModel.getTodasLasTareas()
+                            }
+                            if (selectedItemMiOpcion.opcion == "Mis tareas") {
+                                listadoTareasViewModel.getMisTareas(usuarioViewModel.id.value!!)
 
+                            }
+                            if (selectedItemMiOpcion.opcion == "Mis datos") {
 
-                        }
-                        if (selectedItemMiOpcion.opcion == "Mis datos") {
-
-
-                        }
-                        if (selectedItemMiOpcion.opcion == "Cerrar sesión") {
-                            listadoTareasViewModel.cerrarSesión()
-                            act.finish()
-                        }
-
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
+                            }
+                            if (selectedItemMiOpcion.opcion == "Cerrar sesión") {
+                                listadoTareasViewModel.cerrarSesiónList()
+                                act.finish()
+                            }
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+                }
             }
         }
     }, content = {
@@ -173,7 +207,7 @@ fun ListadoTareas(navController: NavController, listadoTareasViewModel: ListadoT
 
             Column(modifier = Modifier.padding(padding)) {
 
-            TareasList(listadoTareasViewModel = listadoTareasViewModel, navController)
+            TareasList(listadoTareasViewModel, navController)
 
             }
         }
@@ -185,7 +219,6 @@ fun ListadoTareas(navController: NavController, listadoTareasViewModel: ListadoT
 
 @Composable
 fun TareasList(listadoTareasViewModel: ListadoTareasViewModel, navController: NavController) {
-    listadoTareasViewModel.getTareas()
     val tareas = listadoTareasViewModel.tareas
     val context = LocalContext.current
     val showDialogBorrar: Boolean by listadoTareasViewModel.showDialogBorrar.observeAsState(false)
@@ -196,8 +229,8 @@ fun TareasList(listadoTareasViewModel: ListadoTareasViewModel, navController: Na
                 if (tipo == 1) {//Click
                     Log.e("Fernando","Click pulsado")
 
+                    navController.navigate(Rutas.verTarea)
                     listadoTareasViewModel.establecerTareaActual(tar)
-                    navController.navigate(Rutas.perfilUsuarioVistaAdministrador)
                     Toast.makeText(context, "Usuario sel: $tar", Toast.LENGTH_SHORT).show()
                 }
                 if (tipo == 2){//Long click
@@ -232,6 +265,13 @@ fun ItemTareaLista(t : Tarea, onItemSeleccionado:(Tarea, Int)->Unit){
     var isClick by remember { mutableStateOf(false) }
     var isDoubleClick by remember { mutableStateOf(false) }
     var context = LocalContext.current
+    var descripcion: String by remember { mutableStateOf(t.descripcion) }
+    var dificultad: String by remember { mutableStateOf(t.dificultad) }
+    var estimacionHoras: Double by remember { mutableStateOf(t.estimacionHoras) }
+    var horasInvertidas: Double by remember { mutableStateOf(t.horasInvertidas) }
+    var estaAsignada: Boolean by remember { mutableStateOf(t.estaAsignada) }
+    var estaFinalizada: Boolean by remember { mutableStateOf(t.estaFinalizada) }
+
 
     // Variable para mostrar o no el diálogo de confirmación
     var showDialog by remember { mutableStateOf(false) }
@@ -311,9 +351,9 @@ fun ItemTareaLista(t : Tarea, onItemSeleccionado:(Tarea, Int)->Unit){
 
 
 
-fun generarOpcionesMenuTareas() : ArrayList<OpcionMenu> {
-    var titulos = listOf("Volver", "Todas", "Realizadas", "Sin realizar", "Sin asignar", "De usuario",  "Mis datos", "Cerrar sesión")
-    var iconos =  listOf(Icons.Default.ArrowBack, Icons.Default.AllInclusive ,Icons.Default.Done, Icons.Default.Work, Icons.Default.HowToReg, Icons.Default.Search, Icons.Default.House, Icons.Default.ExitToApp)
+fun generarOpcionesMenuTareasAdministrador() : ArrayList<OpcionMenu> {
+    var titulos = listOf("Volver","Crear tarea" , "Todas", "Realizadas", "Sin realizar", "Sin asignar", "De usuario",  "Mis datos", "Cerrar sesión")
+    var iconos =  listOf(Icons.Default.ArrowBack, Icons.Default.NewLabel, Icons.Default.AllInclusive ,Icons.Default.Done, Icons.Default.Work, Icons.Default.HowToReg, Icons.Default.Search, Icons.Default.House, Icons.Default.ExitToApp)
     var opciones= ArrayList<OpcionMenu>()
     for(i in 0..titulos.size-1){
         opciones.add(OpcionMenu(titulos.get(i), iconos.get(i)))
@@ -321,6 +361,15 @@ fun generarOpcionesMenuTareas() : ArrayList<OpcionMenu> {
     return opciones
 }
 
+fun generarOpcionesMenuTareasProgramador() : ArrayList<OpcionMenu> {
+    var titulos = listOf("Todas", "Mis tareas", "Mis datos", "Cerrar sesión")
+    var iconos =  listOf(Icons.Default.AllInclusive, Icons.Default.HowToReg,   Icons.Default.House, Icons.Default.ExitToApp)
+    var opciones= ArrayList<OpcionMenu>()
+    for(i in 0..titulos.size-1){
+        opciones.add(OpcionMenu(titulos.get(i), iconos.get(i)))
+    }
+    return opciones
+}
 
 @Composable
 fun MyAlertDialog(
@@ -366,31 +415,31 @@ fun MyAlertDialog(
 }
 
 
-@Composable
-fun CerrarSesion(context: Context) {
-    val activity = LocalContext.current as Activity
-    val coroutineScope = rememberCoroutineScope()
-
-    val options = AuthSignOutOptions.builder()
-        .globalSignOut(true)
-        .build()
-
-    Amplify.Auth.signOut(options) { signOutResult ->
-        coroutineScope.launch {
-            if (signOutResult is AWSCognitoAuthSignOutResult.CompleteSignOut) {
-                Log.i("Fernando", "Logout correcto")
-                Toast.makeText(context, "Logout ok", Toast.LENGTH_SHORT).show()
-            } else if (signOutResult is AWSCognitoAuthSignOutResult.PartialSignOut) {
-            } else if (signOutResult is AWSCognitoAuthSignOutResult.FailedSignOut) {
-                Log.e("Fernando", "Algo ha fallado en el logout")
-                Toast.makeText(context, "Algo ha fallado en el logout", Toast.LENGTH_SHORT)
-                    .show()
-            }
-        }
-    }
-
-    activity.finish()
-}
+//@Composable
+//fun CerrarSesion(context: Context) {
+//    val activity = LocalContext.current as Activity
+//    val coroutineScope = rememberCoroutineScope()
+//
+//    val options = AuthSignOutOptions.builder()
+//        .globalSignOut(true)
+//        .build()
+//
+//    Amplify.Auth.signOut(options) { signOutResult ->
+//        coroutineScope.launch {
+//            if (signOutResult is AWSCognitoAuthSignOutResult.CompleteSignOut) {
+//                Log.i("Fernando", "Logout correcto")
+//                Toast.makeText(context, "Logout ok", Toast.LENGTH_SHORT).show()
+//            } else if (signOutResult is AWSCognitoAuthSignOutResult.PartialSignOut) {
+//            } else if (signOutResult is AWSCognitoAuthSignOutResult.FailedSignOut) {
+//                Log.e("Fernando", "Algo ha fallado en el logout")
+//                Toast.makeText(context, "Algo ha fallado en el logout", Toast.LENGTH_SHORT)
+//                    .show()
+//            }
+//        }
+//    }
+//
+//    activity.finish()
+//}
 
 
 

@@ -68,7 +68,7 @@ class ListadoTareasViewModel : ViewModel() {
 
 
 
-    fun getTareas() {
+    fun getTodasLasTareas() {
         _tareas.clear()
         Amplify.DataStore.query(
             com.amplifyframework.datastore.generated.model.Tarea::class.java,
@@ -83,7 +83,95 @@ class ListadoTareasViewModel : ViewModel() {
         )
     }
 
-    fun cerrarSesión(){
+    fun getTareasRealizadas() {
+        _tareas.clear()
+        Amplify.DataStore.query(
+            com.amplifyframework.datastore.generated.model.Tarea::class.java,
+            { items ->
+                while (items.hasNext()) {
+                    val item = items.next()
+                    if(item.estaFinalizada){
+                        Log.i("Sergio", "Queried item: ${item.toString()}")
+                        _tareas.add(item)
+                    }
+                }
+            },
+            { failure -> Log.e("Sergio", "Could not query DataStore", failure) }
+        )
+    }
+
+    fun getTareasNoFinalizadas() {
+        _tareas.clear()
+        Amplify.DataStore.query(
+            com.amplifyframework.datastore.generated.model.Tarea::class.java,
+            { items ->
+                while (items.hasNext()) {
+                    val item = items.next()
+                    if(!item.estaFinalizada){
+                        Log.i("Sergio", "Queried item: ${item.toString()}")
+                        _tareas.add(item)
+                    }
+                }
+            },
+            { failure -> Log.e("Sergio", "Could not query DataStore", failure) }
+        )
+    }
+
+    fun getTareasSinAsignar() {
+        _tareas.clear()
+        Amplify.DataStore.query(
+            com.amplifyframework.datastore.generated.model.Tarea::class.java,
+            { items ->
+                while (items.hasNext()) {
+                    val item = items.next()
+                    if(!item.estaAsignada){
+                        Log.i("Sergio", "Queried item: ${item.toString()}")
+                        _tareas.add(item)
+                    }
+                }
+            },
+            { failure -> Log.e("Sergio", "Could not query DataStore", failure) }
+        )
+    }
+
+    fun getTareasDeUsuarioPorId(id: String) {
+        _tareas.clear()
+        Amplify.DataStore.query(
+            com.amplifyframework.datastore.generated.model.Tarea::class.java,
+            { items ->
+                while (items.hasNext()) {
+                    val item = items.next()
+                    if(item.usuarioTarea.id == id){
+                        Log.i("Sergio", "Queried item: ${item.toString()}")
+                        _tareas.add(item)
+                    }
+                }
+            },
+            { failure -> Log.e("Sergio", "Could not query DataStore", failure) }
+        )
+    }
+
+    fun getMisTareas(id: String) {
+        _tareas.clear()
+        Amplify.DataStore.query(
+            com.amplifyframework.datastore.generated.model.Tarea::class.java,
+            { items ->
+                while (items.hasNext()) {
+                    val item = items.next()
+                    if(item.usuarioTarea.id == id){
+                        Log.i("Sergio", "Queried item: ${item.toString()}")
+                        _tareas.add(item)
+                    }
+                }
+            },
+            { failure -> Log.e("Sergio", "Could not query DataStore", failure) }
+        )
+    }
+
+
+
+
+    fun cerrarSesiónList(){
         val options = AuthSignOutOptions.builder()
             .globalSignOut(true)
             .build()
@@ -101,6 +189,17 @@ class ListadoTareasViewModel : ViewModel() {
 
             }
         }
+    }
+
+    fun obatenerTareaVacia(): Tarea {
+        return Tarea.builder()
+            .descripcion("")
+            .dificultad("")
+            .estimacionHoras(0.0)
+            .horasInvertidas(0.0)
+            .estaAsignada(false)
+            .estaFinalizada(false)
+            .build()
     }
 
 

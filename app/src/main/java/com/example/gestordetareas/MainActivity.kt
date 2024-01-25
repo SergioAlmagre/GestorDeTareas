@@ -39,6 +39,7 @@ import com.example.gestordetareas.ModificarUsuario.ModUsuarioViewModel
 import com.example.gestordetareas.ModificarUsuario.ModificarUsuario
 import com.example.gestordetareas.Tarea.CrearTarea
 import com.example.gestordetareas.Tarea.TareaViewModel
+import com.example.gestordetareas.Tarea.VerTarea
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -69,14 +70,18 @@ class MainActivity : ComponentActivity() {
                         listadoUsuariosVM.getUsers()
                     }
 
-                    NavHost(navController = navController, startDestination = Rutas.crearTarea){
-                        
+                    NavHost(navController = navController, startDestination = Rutas.listadoTareas){
+
+                        composable(Rutas.verTarea){
+                            VerTarea(listadoUsuariosVM ,usuarioVM, navController, tareaVM)
+                        }
+
                         composable(Rutas.crearTarea){
-                            CrearTarea(listadoUsuariosVM,navController, usuarioVM, tareaVM, listadoTareasVM)
+                            CrearTarea(listadoUsuariosVM,navController, usuarioVM, tareaVM)
                         }
 
                         composable(Rutas.listadoTareas){
-                            ListadoTareas(navController, listadoTareasVM)
+                            ListadoTareas(usuarioVM,navController, listadoTareasVM)
                         }
 
                         composable(Rutas.listadoUsuarios){

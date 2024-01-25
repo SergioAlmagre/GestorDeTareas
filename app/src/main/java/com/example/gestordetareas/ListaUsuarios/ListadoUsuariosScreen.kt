@@ -345,8 +345,8 @@ fun ItemUsuarioLista(u: Usuario, onItemSeleccionado: (Usuario, Int) -> Unit) {
 
 
 fun generarOpcionesMenuUsuarios() : ArrayList<OpcionMenu> {
-    var titulos = listOf("Volver", "Todos", "Top (+) tareas realizadas", "Top (-) tareas realizadas", "Crear usuario", "Crear tarea", "Mis datos", "Cerrar sesión")
-    var iconos =  listOf(Icons.Default.ArrowBack, Icons.Default.AllInclusive ,Icons.Default.ArrowUpward, Icons.Default.ArrowDownward, Icons.Default.NewLabel , Icons.Default.NewLabel, Icons.Default.House, Icons.Default.ExitToApp)
+    var titulos = listOf("Volver", "Todos", "Top (+) tareas realizadas", "Top (-) tareas realizadas", "Crear usuario",  "Mis datos", "Cerrar sesión")
+    var iconos =  listOf(Icons.Default.ArrowBack, Icons.Default.AllInclusive ,Icons.Default.ArrowUpward, Icons.Default.ArrowDownward , Icons.Default.NewLabel, Icons.Default.House, Icons.Default.ExitToApp)
     var opciones= ArrayList<OpcionMenu>()
     for(i in 0..titulos.size-1){
         opciones.add(OpcionMenu(titulos.get(i), iconos.get(i)))
