@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,18 +19,23 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.AllInclusive
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.House
+import androidx.compose.material.icons.filled.HowToReg
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.NewLabel
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -64,7 +70,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.amplifyframework.datastore.generated.model.Usuario
-import com.example.gestordetareas.Almacen
 import com.example.gestordetareas.R
 import com.example.gestordetareas.Rutas
 import com.example.gestordetareas.Usuario.UsuarioViewModel
@@ -79,7 +84,7 @@ fun ListadoUsuarios(navController: NavController, listadoUsuariosViewModel: List
     var snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val opcs = generarOpcionesMenu()
+    val opcs = generarOpcionesMenuUsuarios()
     var selectedItemMiOpcion by remember { mutableStateOf(opcs[0]) }
     var scope = rememberCoroutineScope()
     var expanded by remember { mutableStateOf(false) }
@@ -99,21 +104,33 @@ fun ListadoUsuarios(navController: NavController, listadoUsuariosViewModel: List
                             drawerState.close()
                         }
                         selectedItemMiOpcion = it //Aquí obtenemos el seleccionado.
-//                            OpcionElegida.eleccion = it.opcion
 
-                        if (selectedItemMiOpcion.opcion == "Manual") {
+                        if (selectedItemMiOpcion.opcion == "Volver") {
+                            navController.navigate(Rutas.eleccionAdministrador)
+
+                        }
+                        if (selectedItemMiOpcion.opcion == "Todos") {
 
 
                         }
-                        if (selectedItemMiOpcion.opcion == "Statistics") {
+                        if (selectedItemMiOpcion.opcion == "Top (+) tareas realizadas") {
 
 
                         }
-                        if (selectedItemMiOpcion.opcion == "Summary") {
+                        if (selectedItemMiOpcion.opcion == "Top (-) tareas realizadas") {
 
 
                         }
-                        if (selectedItemMiOpcion.opcion == "Exit") {
+                        if (selectedItemMiOpcion.opcion == "Crear usuario") {
+                            navController.navigate(Rutas.crearCuenta)
+
+                        }
+                        if (selectedItemMiOpcion.opcion == "Mis datos") {
+
+
+                        }
+                        if (selectedItemMiOpcion.opcion == "Cerrar sesión") {
+                            listadoUsuariosViewModel.cerrarSesión()
                             act.finish()
                         }
 
@@ -171,6 +188,8 @@ fun ListadoUsuarios(navController: NavController, listadoUsuariosViewModel: List
 @Composable
 fun RVUsuariosSticky(listadoUsuariosViewModel: ListadoUsuariosViewModel, navController: NavController, usuarioViewModel: UsuarioViewModel) {
     val context = LocalContext.current
+    var scope = rememberCoroutineScope()
+
 
     val usuariosAgrupados = listadoUsuariosViewModel.usuarios.groupBy { it.nombreCompleto.first().toUpperCase() }
     Log.i("Sergio_usuariosMostrar", usuariosAgrupados.toString())
@@ -194,10 +213,10 @@ fun RVUsuariosSticky(listadoUsuariosViewModel: ListadoUsuariosViewModel, navCont
                     if (tipo == 1) {//Click
                         Log.e("Fernando", "Click pulsado")
 //                        Almacen.usu = usu
+                        Log.i("Sergio", "Usuario seleccionado antes: $usu")
                         usuarioViewModel.establecerUsuarioActual(usu)
-                        Log.i("Sergio", "Usuario actual: ${usuarioViewModel.obtenerUsuarioActual()}")
                         navController.navigate(Rutas.perfilUsuarioVistaAdministrador)
-
+                        Log.i("Sergio", "Usuario seleccionado despues: $usu")
 //                        Toast.makeText(context, "Usuario seleccionado: $usu", Toast.LENGTH_SHORT).show()
                     }
                     if (tipo == 2) {//Long click
@@ -219,69 +238,14 @@ fun RVUsuariosSticky(listadoUsuariosViewModel: ListadoUsuariosViewModel, navCont
 
 
 
-/**
- * Para mostrar la RV en columnas o en Grid.
- * En este ejemplo, el Modifier.pointerInput se utiliza para detectar gestos táctiles y el evento
- * detectTransformGestures para calcular la distancia del gesto. Si la distancia del gesto supera
- * un umbral, se considera como un "long click". El comportamiento real del "long click" se puede
- * personalizar según tus necesidades. En este caso, simplemente imprime un mensaje en el registro.
- */
-//@Composable
-//fun ItemUsuario(u : Usuario, onItemSeleccionado:(Usuario)->Unit){
-//    var isLongClick by remember { mutableStateOf(false) }
-//    var context = LocalContext.current
-//
-//    Card(border = BorderStroke(2.dp, Color.Blue),
-//        modifier = Modifier
-//            //.fillMaxWidth()
-//            .pointerInput(Unit) {
-//                detectTapGestures(
-//                    onPress = {
-//                        Log.e("Fernando", "Press pulsado")
-//                        onItemSeleccionado(u)
-//                    },
-//                    onTap = {
-//                        Log.e("Fernando", "Tap pulsado")
-//                    },
-//                    onLongPress = {
-//                        Log.e("Fernando", "LongPress pulsado")
-//
-//                        isLongClick = true
-//                    },
-//                    onDoubleTap = {
-//                        Log.e("Fernando", "DoubleTap pulsado")
-//                    }
-//                )
-//            } //Para que funcione pointerInput, debe estar comentado 'clickable'
-////            .clickable {
-////                onItemSeleccionado(u) //Función lamda llamada desde RVUsuarios.
-////            }
-//            .padding(top = 1.dp, bottom = 1.dp, start = 1.dp, end = 1.dp)
-//    )
-//    {
-//        Image(painter = painterResource(id = R.drawable.ic_launcher_foreground), contentDescription = "Avatar",
-//            modifier = Modifier
-//                .size(50.dp)
-//                .padding(8.dp)
-//        )
-//        Text(text = u.nombreCompleto, modifier = Modifier
-//            .align(CenterHorizontally)
-//            .padding(2.dp))
-//
-//        Button(onClick = {onItemSeleccionado(u) }) {
-//            Text(text = "Seleccionar")
-//        }
-//    }
-//}
 
-
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ItemUsuarioLista(u: Usuario, onItemSeleccionado: (Usuario, Int) -> Unit) {
     var isLongClick by remember { mutableStateOf(false) }
     var isClick by remember { mutableStateOf(false) }
     var isDoubleClick by remember { mutableStateOf(false) }
     var context = LocalContext.current
-    var isSelected by remember { mutableStateOf(false) }
 
     // Variable para mostrar o no el diálogo de confirmación
     var showDialog by remember { mutableStateOf(false) }
@@ -290,38 +254,29 @@ fun ItemUsuarioLista(u: Usuario, onItemSeleccionado: (Usuario, Int) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 1.dp, bottom = 1.dp, start = 1.dp, end = 1.dp)
-
-
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onPress = {
+                .padding(top = 1.dp, bottom = 1.dp, start = 1.dp, end = 1.dp)
+                .combinedClickable(
+                    onLongClick = {
+                        Log.e("Fernando", "LongPress pulsado")
+                        isLongClick = true
+                        showDialog = true
 
-                        },
-                        onTap = {
-                            Log.e("Fernando", "Tap pulsado")
-                            Log.e("Fernando", "Press pulsado")
-                            isClick = true
-                            onItemSeleccionado(u, 1)
-
-                        },
-                        onLongPress = {
-                            Log.e("Fernando", "LongPress pulsado")
-                            isLongClick = true
-                            // Mostrar el diálogo de confirmación al detectar una pulsación larga
-                            showDialog = true
-                        },
-                        onDoubleTap = {
-                            Log.e("Fernando", "DoubleTap pulsado")
-                            isDoubleClick = true
-                            onItemSeleccionado(u, 3)
-                        }
-                    )
-                }
-        ) {
+                    },
+                    onClick = {
+                        Log.e("Fernando", "Click pulsado")
+                        isClick = true
+                        onItemSeleccionado(u, 1)
+                    }
+                )//Para que funcione lo anterior se debe comentar lo de 'clickable'
+//            .clickable {
+//                    onItemSeleccionado(u,1) //Función lamda llamada desde RVUsuarios.
+//            }
+                .padding(top = 1.dp, bottom = 1.dp, start = 1.dp, end = 1.dp)
+        ){
             Row(
                 modifier = Modifier
                     .padding(6.dp)
@@ -389,9 +344,9 @@ fun ItemUsuarioLista(u: Usuario, onItemSeleccionado: (Usuario, Int) -> Unit) {
 
 
 
-fun generarOpcionesMenu() : ArrayList<OpcionMenu> {
-    var titulos = listOf("Volver", "Todas", "Realizadas", "Sin realizar", "Sin asignar", "De usuario")
-    var iconos =  listOf(Icons.Default.Home, Icons.Default.Search, Icons.Default.ArrowForward, Icons.Default.ExitToApp, Icons.Default.ExitToApp, Icons.Default.ExitToApp)
+fun generarOpcionesMenuUsuarios() : ArrayList<OpcionMenu> {
+    var titulos = listOf("Volver", "Todos", "Top (+) tareas realizadas", "Top (-) tareas realizadas", "Crear usuario", "Crear tarea", "Mis datos", "Cerrar sesión")
+    var iconos =  listOf(Icons.Default.ArrowBack, Icons.Default.AllInclusive ,Icons.Default.ArrowUpward, Icons.Default.ArrowDownward, Icons.Default.NewLabel , Icons.Default.NewLabel, Icons.Default.House, Icons.Default.ExitToApp)
     var opciones= ArrayList<OpcionMenu>()
     for(i in 0..titulos.size-1){
         opciones.add(OpcionMenu(titulos.get(i), iconos.get(i)))
@@ -462,27 +417,84 @@ fun MiToolBar(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MiDropDown(isExpanded: Boolean, setExpanded: (Boolean) -> Unit, setSelected:(String)->Unit) {
-//    var selectedText by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
-    var usuarios = listOf<String>("Álvaro", "José", "Lorenzo", "Ramón", "Sergio", "María")
 
-    Column(modifier = Modifier.padding(10.dp)) {
-        DropdownMenu(expanded = isExpanded, onDismissRequest = {
-            setExpanded(false)
-        })
-        {
-            usuarios.forEach {
-                DropdownMenuItem(text = { Text(text = it) }, onClick = {
-                    setExpanded (false)
-                    setSelected(it)
-                })
-            }
-        }
-    }
-}
+/**
+ * Para mostrar la RV en columnas o en Grid.
+ * En este ejemplo, el Modifier.pointerInput se utiliza para detectar gestos táctiles y el evento
+ * detectTransformGestures para calcular la distancia del gesto. Si la distancia del gesto supera
+ * un umbral, se considera como un "long click". El comportamiento real del "long click" se puede
+ * personalizar según tus necesidades. En este caso, simplemente imprime un mensaje en el registro.
+ */
+//@Composable
+//fun ItemUsuario(u : Usuario, onItemSeleccionado:(Usuario)->Unit){
+//    var isLongClick by remember { mutableStateOf(false) }
+//    var context = LocalContext.current
+//
+//    Card(border = BorderStroke(2.dp, Color.Blue),
+//        modifier = Modifier
+//            //.fillMaxWidth()
+//            .pointerInput(Unit) {
+//                detectTapGestures(
+//                    onPress = {
+//                        Log.e("Fernando", "Press pulsado")
+//                        onItemSeleccionado(u)
+//                    },
+//                    onTap = {
+//                        Log.e("Fernando", "Tap pulsado")
+//                    },
+//                    onLongPress = {
+//                        Log.e("Fernando", "LongPress pulsado")
+//
+//                        isLongClick = true
+//                    },
+//                    onDoubleTap = {
+//                        Log.e("Fernando", "DoubleTap pulsado")
+//                    }
+//                )
+//            } //Para que funcione pointerInput, debe estar comentado 'clickable'
+////            .clickable {
+////                onItemSeleccionado(u) //Función lamda llamada desde RVUsuarios.
+////            }
+//            .padding(top = 1.dp, bottom = 1.dp, start = 1.dp, end = 1.dp)
+//    )
+//    {
+//        Image(painter = painterResource(id = R.drawable.ic_launcher_foreground), contentDescription = "Avatar",
+//            modifier = Modifier
+//                .size(50.dp)
+//                .padding(8.dp)
+//        )
+//        Text(text = u.nombreCompleto, modifier = Modifier
+//            .align(CenterHorizontally)
+//            .padding(2.dp))
+//
+//        Button(onClick = {onItemSeleccionado(u) }) {
+//            Text(text = "Seleccionar")
+//        }
+//    }
+//}
+
+//
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun MiDropDown(isExpanded: Boolean, setExpanded: (Boolean) -> Unit, setSelected:(String)->Unit) {
+////    var selectedText by remember { mutableStateOf("") }
+//    var expanded by remember { mutableStateOf(false) }
+//    var usuarios = listOf<String>("Álvaro", "José", "Lorenzo", "Ramón", "Sergio", "María")
+//
+//    Column(modifier = Modifier.padding(10.dp)) {
+//        DropdownMenu(expanded = isExpanded, onDismissRequest = {
+//            setExpanded(false)
+//        })
+//        {
+//            usuarios.forEach {
+//                DropdownMenuItem(text = { Text(text = it) }, onClick = {
+//                    setExpanded (false)
+//                    setSelected(it)
+//                })
+//            }
+//        }
+//    }
+//}
 
 
 

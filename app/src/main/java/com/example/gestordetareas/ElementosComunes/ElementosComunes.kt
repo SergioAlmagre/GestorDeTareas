@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.amplifyframework.datastore.generated.model.Usuario
+import com.example.gestordetareas.ListaUsuarios.ListadoUsuariosViewModel
 import com.example.gestordetareas.Rutas
 import com.example.gestordetareas.Usuario.UsuarioViewModel
 
@@ -46,16 +47,17 @@ fun BotonAceptar(navController: NavController, ruta:String) {
 }
 
 @Composable
-fun BotonGuardarDatos(navController: NavController, ruta:String, usuarioViewModel: UsuarioViewModel) {
+fun BotonGuardarDatos(navController: NavController, ruta:String, usuarioViewModel: UsuarioViewModel,listadoUsuariosViewModel: ListadoUsuariosViewModel) {
 
     var usuarioActual = usuarioViewModel.obtenerUsuarioActual()
     usuarioViewModel.cambiarId(usuarioActual!!.id)
-    usuarioViewModel.cambiarNombre(usuarioActual.nombreCompleto)
+    usuarioViewModel.cambiarNombreUsuarioActual(usuarioActual.nombreCompleto)
 
     Button(
         onClick = {
             var usu = Usuario.builder().id(usuarioViewModel.id.value).rol(usuarioViewModel.rol.value).nombreCompleto(usuarioViewModel.nombreCompleto.value).email(usuarioActual.email).tareasFinalizadas(usuarioActual.tareasFinalizadas).build()
             usuarioViewModel.guardarModificarUsuario(usu)
+            listadoUsuariosViewModel.getUsers()
             Log.i("Sergio", "Boton guardar:" + usuarioViewModel.toString())
             Log.i("Sergio", "Boton guardar:" + usu)
             navController.navigate(ruta)

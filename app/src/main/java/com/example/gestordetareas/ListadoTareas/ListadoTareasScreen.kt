@@ -8,23 +8,30 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AllInclusive
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.House
+import androidx.compose.material.icons.filled.HowToReg
+import androidx.compose.material.icons.filled.NewLabel
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DrawerValue
@@ -53,21 +60,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import com.amplifyframework.auth.cognito.result.AWSCognitoAuthSignOutResult
 import com.amplifyframework.auth.options.AuthSignOutOptions
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.generated.model.Tarea
-import com.example.gestordetareas.Almacen
-import com.example.gestordetareas.Rutas
-import com.example.gestordetareas.ListaUsuarios.ListadoUsuariosViewModel
 import com.example.gestordetareas.ListaUsuarios.MiToolBar
-import com.example.gestordetareas.ListaUsuarios.RVUsuariosSticky
-import com.example.gestordetareas.ListaUsuarios.generarOpcionesMenu
+import com.example.gestordetareas.ListaUsuarios.OpcionMenu
+import com.example.gestordetareas.ListaUsuarios.generarOpcionesMenuUsuarios
+import com.example.gestordetareas.Rutas
 import kotlinx.coroutines.launch
 
 
@@ -78,7 +81,7 @@ fun ListadoTareas(navController: NavController, listadoTareasViewModel: ListadoT
     var snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val opcs = generarOpcionesMenu()
+    val opcs = generarOpcionesMenuTareas()
     var selectedItemMiOpcion by remember { mutableStateOf(opcs[0]) }
     var scope = rememberCoroutineScope()
     var expanded by remember { mutableStateOf(false) }
@@ -100,19 +103,31 @@ fun ListadoTareas(navController: NavController, listadoTareasViewModel: ListadoT
                         selectedItemMiOpcion = it //Aquí obtenemos el seleccionado.
 //                            OpcionElegida.eleccion = it.opcion
 
-                        if (selectedItemMiOpcion.opcion == "Manual") {
+                        if (selectedItemMiOpcion.opcion == "Volver") {
+                            navController.navigate(Rutas.eleccionAdministrador)
+
+                        }
+                        if (selectedItemMiOpcion.opcion == "Todas") {
 
 
                         }
-                        if (selectedItemMiOpcion.opcion == "Statistics") {
+                        if (selectedItemMiOpcion.opcion == "Realizadas") {
 
 
                         }
-                        if (selectedItemMiOpcion.opcion == "Summary") {
+                        if (selectedItemMiOpcion.opcion == "Sin asignar") {
+                            act.finish()
+                        }
+                        if (selectedItemMiOpcion.opcion == "De usuario") {
 
 
                         }
-                        if (selectedItemMiOpcion.opcion == "Exit") {
+                        if (selectedItemMiOpcion.opcion == "Mis datos") {
+
+
+                        }
+                        if (selectedItemMiOpcion.opcion == "Cerrar sesión") {
+                            listadoTareasViewModel.cerrarSesión()
                             act.finish()
                         }
 
@@ -158,9 +173,7 @@ fun ListadoTareas(navController: NavController, listadoTareasViewModel: ListadoT
 
             Column(modifier = Modifier.padding(padding)) {
 
-
-                TareasList(listadoTareasViewModel = listadoTareasViewModel)
-
+            TareasList(listadoTareasViewModel = listadoTareasViewModel, navController)
 
             }
         }
@@ -170,44 +183,8 @@ fun ListadoTareas(navController: NavController, listadoTareasViewModel: ListadoT
 
 
 
-
-
-
-//
-//@Composable
-//fun Listado(
-//    navController: NavHostController,
-//    principalViewModel: PrincipalViewModel,
-//    listadoTareasViewModel: ListadoTareasViewModel
-//) {
-//    var context = LocalContext.current
-//    Box(
-//        Modifier
-//            .fillMaxSize()
-//            .padding(8.dp)
-//    ) {
-//        Column {
-//            Text("Listado", fontSize = 20.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-//            Body( navController, principalViewModel, listadoTareasViewModel)
-////            CerrarSesion(context)
-//        }
-//
-//    }
-//}
-//
-//@Composable
-//fun Body(navController: NavHostController, principalViewModel: PrincipalViewModel, listadoTareasViewModel: ListadoTareasViewModel) {
-//    Column {
-//        //Text(listadoViewModel.usuarios.toString())
-//        TareasList(listadoTareasViewModel = listadoTareasViewModel)
-//        IrPrincipalButton(){
-//            navController.navigate(Rutas.Principal)
-//        }
-//    }
-//}
-
 @Composable
-fun TareasList(listadoTareasViewModel: ListadoTareasViewModel) {
+fun TareasList(listadoTareasViewModel: ListadoTareasViewModel, navController: NavController) {
     listadoTareasViewModel.getTareas()
     val tareas = listadoTareasViewModel.tareas
     val context = LocalContext.current
@@ -218,11 +195,14 @@ fun TareasList(listadoTareasViewModel: ListadoTareasViewModel) {
             ItemTareaLista(t = tarea){ tar, tipo -> //Llamada a la función lamda clickable del card en ItemTarea
                 if (tipo == 1) {//Click
                     Log.e("Fernando","Click pulsado")
+
+                    listadoTareasViewModel.establecerTareaActual(tar)
+                    navController.navigate(Rutas.perfilUsuarioVistaAdministrador)
                     Toast.makeText(context, "Usuario sel: $tar", Toast.LENGTH_SHORT).show()
                 }
                 if (tipo == 2){//Long click
-                    listadoTareasViewModel.dialogOpen()
-                    listadoTareasViewModel.tareaBorrar(tar)
+
+                    listadoTareasViewModel.borrarTarea(tar)
                     Log.e("Fernando","Long click pulsado")
                 }
                 if (tipo == 3){//Double click
@@ -253,19 +233,19 @@ fun ItemTareaLista(t : Tarea, onItemSeleccionado:(Tarea, Int)->Unit){
     var isDoubleClick by remember { mutableStateOf(false) }
     var context = LocalContext.current
 
-    Card(border = BorderStroke(2.dp, Color.Blue),
+    // Variable para mostrar o no el diálogo de confirmación
+    var showDialog by remember { mutableStateOf(false) }
+
+    Card(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(top = 1.dp, bottom = 1.dp, start = 1.dp, end = 1.dp)
             .combinedClickable(
-                onDoubleClick = {
-                    Log.e("Fernando", "Doble click pulsado")
-                    isDoubleClick = true
-                    onItemSeleccionado(t, 3)
-                },
                 onLongClick = {
                     Log.e("Fernando", "LongPress pulsado")
                     isLongClick = true
-                    onItemSeleccionado(t, 2)
+                    showDialog = true
+
                 },
                 onClick = {
                     Log.e("Fernando", "Click pulsado")
@@ -279,64 +259,66 @@ fun ItemTareaLista(t : Tarea, onItemSeleccionado:(Tarea, Int)->Unit){
             .padding(top = 1.dp, bottom = 1.dp, start = 1.dp, end = 1.dp)
     )
     {
-        Text("Descripcion", style = TextStyle(fontWeight = FontWeight.Bold))
         Text(text = t.descripcion, modifier = Modifier
             .align(Alignment.CenterHorizontally)
-            .padding(2.dp)
-            .combinedClickable(
-                onDoubleClick = {
-                    Log.e("Fernando", "Doble click pulsado")
-                },
-                onLongClick = {
-                    Log.e("Fernando", "LongPress pulsado")
-                    isLongClick = true
-                },
-                onClick = {
-                    Log.e("Fernando", "Click pulsado")
+            .padding(10.dp),
+            style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            )
+    }
+    // Diálogo de confirmación
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                // Ocultar el diálogo cuando el usuario toca fuera de él
+                showDialog = false
+            },
+            title = {
+                Text(text = "Confirmación")
+            },
+            text = {
+                Text(text = "¿Estás seguro de que deseas realizar esta acción?")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        // Realizar la acción después de la confirmación
+                        onItemSeleccionado(t, 2)
+
+                        // Ocultar el diálogo
+                        showDialog = false
+                    }
+                ) {
+                    Text("Confirmar")
                 }
-            ))
-
-        Text("Estimación horas", style = TextStyle(fontWeight = FontWeight.Bold))
-        Text(
-            text = t.estimacionHoras.toString(),
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(2.dp),
-            fontSize = 12.sp
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        // Cancelar la acción y cerrar el diálogo
+                        showDialog = false
+                    }
+                ) {
+                    Text("Cancelar")
+                }
+            }
         )
-
-        Text("Dificultad", style = TextStyle(fontWeight = FontWeight.Bold))
-        Text(
-            text = t.dificultad,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(2.dp),
-            fontSize = 12.sp
-        )
-        Checkbox(
-            checked = t.estaFinalizada,  onCheckedChange = {  }
-        )
-//        Button(onClick = {onItemSeleccionado(u,1) }) {
-//            Text(text = "Seleccionar")
-//        }
     }
 }
 
 
-@Composable
-fun IrPrincipalButton(onClickAction: (Boolean) -> Unit) {
-    Button(
-        onClick = {
-            onClickAction(true);
-        },
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-            contentColor = Color.White,
-            disabledContentColor = Color.White
-        )
-    ) {
-        Text(text = "Ir a la principal")
+
+
+
+
+
+fun generarOpcionesMenuTareas() : ArrayList<OpcionMenu> {
+    var titulos = listOf("Volver", "Todas", "Realizadas", "Sin realizar", "Sin asignar", "De usuario",  "Mis datos", "Cerrar sesión")
+    var iconos =  listOf(Icons.Default.ArrowBack, Icons.Default.AllInclusive ,Icons.Default.Done, Icons.Default.Work, Icons.Default.HowToReg, Icons.Default.Search, Icons.Default.House, Icons.Default.ExitToApp)
+    var opciones= ArrayList<OpcionMenu>()
+    for(i in 0..titulos.size-1){
+        opciones.add(OpcionMenu(titulos.get(i), iconos.get(i)))
     }
+    return opciones
 }
 
 
@@ -383,33 +365,121 @@ fun MyAlertDialog(
     )
 }
 
+
 @Composable
 fun CerrarSesion(context: Context) {
     val activity = LocalContext.current as Activity
     val coroutineScope = rememberCoroutineScope()
 
-    Button(modifier = Modifier.fillMaxWidth(), onClick = {
-        val options = AuthSignOutOptions.builder()
-            .globalSignOut(true)
-            .build()
+    val options = AuthSignOutOptions.builder()
+        .globalSignOut(true)
+        .build()
 
-        Amplify.Auth.signOut(options) { signOutResult ->
-            coroutineScope.launch {
-                if (signOutResult is AWSCognitoAuthSignOutResult.CompleteSignOut) {
-                    Log.i("Fernando", "Logout correcto")
-                    Toast.makeText(context, "Logout ok", Toast.LENGTH_SHORT).show()
-                } else if (signOutResult is AWSCognitoAuthSignOutResult.PartialSignOut) {
-                } else if (signOutResult is AWSCognitoAuthSignOutResult.FailedSignOut) {
-                    Log.e("Fernando", "Algo ha fallado en el logout")
-                    Toast.makeText(context, "Algo ha fallado en el logout", Toast.LENGTH_SHORT)
-                        .show()
-                }
+    Amplify.Auth.signOut(options) { signOutResult ->
+        coroutineScope.launch {
+            if (signOutResult is AWSCognitoAuthSignOutResult.CompleteSignOut) {
+                Log.i("Fernando", "Logout correcto")
+                Toast.makeText(context, "Logout ok", Toast.LENGTH_SHORT).show()
+            } else if (signOutResult is AWSCognitoAuthSignOutResult.PartialSignOut) {
+            } else if (signOutResult is AWSCognitoAuthSignOutResult.FailedSignOut) {
+                Log.e("Fernando", "Algo ha fallado en el logout")
+                Toast.makeText(context, "Algo ha fallado en el logout", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
-
-        activity.finish()
-    }) {
-        Text(text = "Cerrar aplicación")
-
     }
+
+    activity.finish()
 }
+
+
+
+//
+//@Composable
+//fun IrPrincipalButton(onClickAction: (Boolean) -> Unit) {
+//    Button(
+//        onClick = {
+//            onClickAction(true);
+//        },
+//        modifier = Modifier.fillMaxWidth(),
+//        colors = ButtonDefaults.buttonColors(
+//            contentColor = Color.White,
+//            disabledContentColor = Color.White
+//        )
+//    ) {
+//        Text(text = "Ir a la principal")
+//    }
+//}
+
+
+
+
+//@Composable
+//fun CerrarSesion(context: Context) {
+//    val activity = LocalContext.current as Activity
+//    val coroutineScope = rememberCoroutineScope()
+//
+//    Button(modifier = Modifier.fillMaxWidth(), onClick = {
+//        val options = AuthSignOutOptions.builder()
+//            .globalSignOut(true)
+//            .build()
+//
+//        Amplify.Auth.signOut(options) { signOutResult ->
+//            coroutineScope.launch {
+//                if (signOutResult is AWSCognitoAuthSignOutResult.CompleteSignOut) {
+//                    Log.i("Fernando", "Logout correcto")
+//                    Toast.makeText(context, "Logout ok", Toast.LENGTH_SHORT).show()
+//                } else if (signOutResult is AWSCognitoAuthSignOutResult.PartialSignOut) {
+//                } else if (signOutResult is AWSCognitoAuthSignOutResult.FailedSignOut) {
+//                    Log.e("Fernando", "Algo ha fallado en el logout")
+//                    Toast.makeText(context, "Algo ha fallado en el logout", Toast.LENGTH_SHORT)
+//                        .show()
+//                }
+//            }
+//        }
+//
+//        activity.finish()
+//    }) {
+//        Text(text = "Cerrar aplicación")
+//
+//    }
+//}
+
+
+
+
+
+
+
+//
+//@Composable
+//fun Listado(
+//    navController: NavHostController,
+//    principalViewModel: PrincipalViewModel,
+//    listadoTareasViewModel: ListadoTareasViewModel
+//) {
+//    var context = LocalContext.current
+//    Box(
+//        Modifier
+//            .fillMaxSize()
+//            .padding(8.dp)
+//    ) {
+//        Column {
+//            Text("Listado", fontSize = 20.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+//            Body( navController, principalViewModel, listadoTareasViewModel)
+////            CerrarSesion(context)
+//        }
+//
+//    }
+//}
+//
+//@Composable
+//fun Body(navController: NavHostController, principalViewModel: PrincipalViewModel, listadoTareasViewModel: ListadoTareasViewModel) {
+//    Column {
+//        //Text(listadoViewModel.usuarios.toString())
+//        TareasList(listadoTareasViewModel = listadoTareasViewModel)
+//        IrPrincipalButton(){
+//            navController.navigate(Rutas.Principal)
+//        }
+//    }
+//}

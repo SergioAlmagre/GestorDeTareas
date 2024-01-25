@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.amplifyframework.auth.cognito.result.AWSCognitoAuthSignOutResult
+import com.amplifyframework.auth.options.AuthSignOutOptions
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.generated.model.Usuario
 
@@ -12,7 +14,6 @@ class ListadoUsuariosViewModel {
 
     private val _showDialog = MutableLiveData<Boolean>()
     val showDialog: LiveData<Boolean> = _showDialog
-
 
     private val _usuarios = mutableStateListOf<Usuario>()
     val usuarios: List<Usuario> = _usuarios
@@ -47,6 +48,26 @@ class ListadoUsuariosViewModel {
             },
             { failure -> Log.e("Sergio", "Could not query DataStore", failure) }
         )
+    }
+
+    fun cerrarSesión(){
+        val options = AuthSignOutOptions.builder()
+            .globalSignOut(true)
+            .build()
+
+        Amplify.Auth.signOut(options) { signOutResult ->
+
+            if (signOutResult is AWSCognitoAuthSignOutResult.CompleteSignOut) {
+                Log.i("Fernando", "Logout correcto")
+
+            } else if (signOutResult is AWSCognitoAuthSignOutResult.PartialSignOut) {
+            } else if (signOutResult is AWSCognitoAuthSignOutResult.FailedSignOut) {
+                Log.e("Fernando", "Algo ha fallado en el logout")
+
+            } else {
+
+            }
+        }
     }
 
 

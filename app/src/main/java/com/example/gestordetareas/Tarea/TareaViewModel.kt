@@ -8,6 +8,9 @@ import com.amplifyframework.core.model.query.Where
 
 class TareaViewModel {
 
+    private val _porcentaje = MutableLiveData<Int>()
+    val porcentaje: LiveData<Int> = _porcentaje
+
     private val _descripcion = MutableLiveData<String>()
     val descripcion: LiveData<String> = _descripcion
 
@@ -25,7 +28,6 @@ class TareaViewModel {
 
     private val _estaFinalizada = MutableLiveData<Boolean>()
     val estaFinalizada: LiveData<Boolean> = _estaFinalizada
-
 
     private val _showDialog = MutableLiveData<Boolean>()
     val showDialog: LiveData<Boolean> = _showDialog
@@ -48,6 +50,11 @@ class TareaViewModel {
 
 
     fun cambiarEstimacionHoras(e: String) {
+        val doubleValue = e.toDoubleOrNull() ?: 0.0
+        this._estimacionHoras.value = doubleValue
+    }
+
+    fun cambiarHorasInvertidas(e: String) {
         val doubleValue = e.toDoubleOrNull() ?: 0.0
         this._estimacionHoras.value = doubleValue
     }
@@ -109,5 +116,40 @@ class TareaViewModel {
             { success -> Log.i("Sergio", "Saved task: " + success.item().toString()) },
             { error -> Log.e("Sergio", "Could not save item to DataStore", error) }
         )
+    }
+
+    fun limpiarDatos(){
+        this._descripcion.value = ""
+        this._estimacionHoras.value = 0.0
+        this._dificultad.value = ""
+        this._estaFinalizada.value = false
+    }
+
+    fun calcularPorcentaje(horasInvertidas: Double, estimacionHoras: Double): String {
+        var porcentaje = 0
+        if(horasInvertidas != null && estimacionHoras != null){
+            if (horasInvertidas != 0.0 && estimacionHoras != 0.0) {
+                porcentaje = (horasInvertidas / estimacionHoras * 100).toInt()
+            }
+        }
+        return porcentaje.toString() + "%"
+    }
+
+    fun esPorcenajeYHorasValido(horasInvertidas: Double, estimacionHoras: Double): Boolean {
+        var valido = false
+        if(horasInvertidas != null && estimacionHoras != null){
+            if (horasInvertidas != 0.0 && estimacionHoras != 0.0) {
+                valido = true
+            }
+        }
+        return valido
+    }
+
+    fun estaAsignadaONull(estaAsignada: Boolean?): Boolean {
+        var asignada = false
+        if(estaAsignada != null){
+            asignada = estaAsignada
+        }
+        return asignada
     }
 }

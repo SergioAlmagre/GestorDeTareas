@@ -5,13 +5,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.generated.model.Usuario
-import com.example.gestordetareas.Rutas
 import java.util.concurrent.CompletableFuture
 
 class UsuarioViewModel {
 
-    private val _usuarioActual = MutableLiveData<Usuario?>()
-    val usuarioActual: LiveData<Usuario?> = _usuarioActual
+    private var _usuarioActual = MutableLiveData<Usuario?>()
+    var usuarioActual: LiveData<Usuario?> = _usuarioActual
 
     private val _rol = MutableLiveData<Int>()
     val rol: LiveData<Int> = _rol
@@ -67,6 +66,10 @@ class UsuarioViewModel {
         return completableFuture
     }
 
+    fun cambiarNombre(nombre:String){
+        _nombreCompleto.value = nombre
+    }
+
     fun cambiarId(it: String) {
         this._id.value = it
     }
@@ -83,10 +86,9 @@ class UsuarioViewModel {
         this._rol.value = it
     }
 
-    fun cambiarNombre(it: String) {
-        this._nombreCompleto.value = it
+    fun cambiarNombreUsuarioActual(nombre: String) {
+        _usuarioActual.value?.nombreCompleto ?: nombre
     }
-
 
     fun cambiarEmail(it: String) {
         this._email.value = it
@@ -120,6 +122,10 @@ class UsuarioViewModel {
         _isLogoutOk.value = false
     }
 
+    fun cambiarTareasFinalizadas(it: Int) {
+        this._tareasFinalizadas.value = it
+    }
+
 
     fun insertarUsuario(usuario: Usuario): CompletableFuture<Boolean> {
         val completableFuture = CompletableFuture<Boolean>()
@@ -135,7 +141,6 @@ class UsuarioViewModel {
                 completableFuture.complete(false)
             }
         )
-
         return completableFuture
     }
 

@@ -69,10 +69,10 @@ class MainActivity : ComponentActivity() {
                         listadoUsuariosVM.getUsers()
                     }
 
-                    NavHost(navController = navController, startDestination = Rutas.listadoUsuarios){
+                    NavHost(navController = navController, startDestination = Rutas.crearTarea){
                         
                         composable(Rutas.crearTarea){
-                            CrearTarea(navController, tareaVM, listadoTareasVM)
+                            CrearTarea(listadoUsuariosVM,navController, usuarioVM, tareaVM, listadoTareasVM)
                         }
 
                         composable(Rutas.listadoTareas){
@@ -96,7 +96,7 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(Rutas.perfilUsuarioVistaAdministrador){
-                            ModificarUsuario(navController, usuarioVM, modificarUsuarioVM)
+                            ModificarUsuario(navController, usuarioVM, modificarUsuarioVM,listadoUsuariosVM)
                         }
 
                     }
