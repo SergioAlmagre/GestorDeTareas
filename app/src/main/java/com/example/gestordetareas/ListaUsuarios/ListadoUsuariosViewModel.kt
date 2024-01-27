@@ -34,6 +34,54 @@ class ListadoUsuariosViewModel {
         )
     }
 
+    fun geTop3MasTareas() {
+        _usuarios.clear()
+        Amplify.DataStore.query(
+            Usuario::class.java,
+            { usuarios ->
+
+                _usuarios.sortedByDescending { it.tareasFinalizadas }
+
+                // Obtener los primeros 5 usuarios (o menos si hay menos de 5 usuarios)
+                val primerosCincoUsuarios = _usuarios.take(3)
+
+                // Hacer algo con los usuarios obtenidos
+                for (usuario in primerosCincoUsuarios) {
+                    Log.i("Sergio", "Usuario: ${usuario.nombreCompleto}, Tareas Realizadas: ${usuario.tareasFinalizadas}")
+                }
+            },
+            { exception ->
+                // Manejar excepciones si es necesario
+                Log.e("Sergio", "Error al consultar usuarios", exception)
+            }
+        )
+    }
+
+    fun geTop3MenosTareas() {
+        _usuarios.clear()
+        Amplify.DataStore.query(
+            Usuario::class.java,
+            { usuarios ->
+
+                _usuarios.sortedBy{ it.tareasFinalizadas }
+
+                // Obtener los primeros 5 usuarios (o menos si hay menos de 5 usuarios)
+                val primerosCincoUsuarios = _usuarios.take(3)
+
+                // Hacer algo con los usuarios obtenidos
+                for (usuario in primerosCincoUsuarios) {
+                    Log.i("Sergio", "Usuario: ${usuario.nombreCompleto}, Tareas Realizadas: ${usuario.tareasFinalizadas}")
+                }
+            },
+            { exception ->
+                // Manejar excepciones si es necesario
+                Log.e("Sergio", "Error al consultar usuarios", exception)
+            }
+        )
+    }
+
+
+
     fun getUsers() {
         _usuarios.clear()  // Utiliza la variable de instancia, no una nueva variable local
 

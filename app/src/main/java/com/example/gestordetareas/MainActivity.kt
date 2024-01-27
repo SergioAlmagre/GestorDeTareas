@@ -21,9 +21,10 @@ import com.amplifyframework.api.aws.AWSApiPlugin
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.AWSDataStorePlugin
-import com.example.gestordetareas.CrearCuenta.CrearCuenta
+import com.example.gestordetareas.CrearCuenta.CrearUsuario
 import com.example.gestordetareas.CrearCuenta.CrearCuentaViewModel
 import com.example.gestordetareas.EleccionAdministrador.botonesSeleccion
+import com.example.gestordetareas.ElementosComunes.Rutas
 import com.example.gestordetareas.ListaUsuarios.ListadoUsuarios
 import com.example.gestordetareas.ListaUsuarios.ListadoUsuariosViewModel
 
@@ -35,16 +36,10 @@ import com.example.gestordetareas.Usuario.UsuarioViewModel
 import com.example.gestordetareas.ui.theme.GestorDeTareasTheme
 
 import com.example.gestordetareas.Login.LoginViewModel
-import com.example.gestordetareas.ModificarUsuario.ModUsuarioViewModel
-import com.example.gestordetareas.ModificarUsuario.ModificarUsuario
-import com.example.gestordetareas.Tarea.CrearTarea
+import com.example.gestordetareas.Usuario.ModUsuarioViewModel
+import com.example.gestordetareas.Usuario.ModificarUsuario
 import com.example.gestordetareas.Tarea.TareaViewModel
 import com.example.gestordetareas.Tarea.VerTarea
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
     val listadoTareasVM = ListadoTareasViewModel()
@@ -70,18 +65,14 @@ class MainActivity : ComponentActivity() {
                         listadoUsuariosVM.getUsers()
                     }
 
-                    NavHost(navController = navController, startDestination = Rutas.listadoTareas){
+                    NavHost(navController = navController, startDestination = Rutas.login){
 
                         composable(Rutas.verTarea){
-                            VerTarea(listadoUsuariosVM ,usuarioVM, navController, tareaVM)
-                        }
-
-                        composable(Rutas.crearTarea){
-                            CrearTarea(listadoUsuariosVM,navController, usuarioVM, tareaVM)
+                            VerTarea(listadoTareasVM ,listadoUsuariosVM ,usuarioVM, navController, tareaVM)
                         }
 
                         composable(Rutas.listadoTareas){
-                            ListadoTareas(usuarioVM,navController, listadoTareasVM)
+                            ListadoTareas(tareaVM ,modificarUsuarioVM ,usuarioVM,navController, listadoTareasVM)
                         }
 
                         composable(Rutas.listadoUsuarios){
@@ -89,18 +80,18 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(Rutas.eleccionAdministrador){
-                            botonesSeleccion(navController)
+                            botonesSeleccion(listadoUsuariosVM,listadoTareasVM,navController)
                         }
 
                         composable(Rutas.crearCuenta){
-                            CrearCuenta(navController,usuarioVM, crearCuentaVM )
+                            CrearUsuario(navController,usuarioVM, crearCuentaVM )
                         }
 
                         composable(Rutas.login){
-                            Login(navController, listadoTareasVM, loginVM)
+                            Login(crearCuentaVM, usuarioVM ,navController, listadoTareasVM, loginVM)
                         }
 
-                        composable(Rutas.perfilUsuarioVistaAdministrador){
+                        composable(Rutas.modUsuario){
                             ModificarUsuario(navController, usuarioVM, modificarUsuarioVM,listadoUsuariosVM)
                         }
 

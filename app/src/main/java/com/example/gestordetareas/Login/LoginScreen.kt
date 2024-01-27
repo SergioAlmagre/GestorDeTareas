@@ -50,16 +50,24 @@ import androidx.navigation.NavHostController
 import com.amplifyframework.auth.cognito.result.AWSCognitoAuthSignOutResult
 import com.amplifyframework.auth.options.AuthSignOutOptions
 import com.amplifyframework.core.Amplify
-import com.example.gestordetareas.Rutas
+import com.example.gestordetareas.ElementosComunes.Rutas
 import com.example.gestordetareas.ListadoTareas.ListadoTareasViewModel
 import android.content.Context
-
+import com.example.gestordetareas.CrearCuenta.CrearCuentaViewModel
+import com.example.gestordetareas.ElementosComunes.InterVentana
+import com.example.gestordetareas.Usuario.UsuarioViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 
 
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 @Composable
 fun Login(
+    crearCuentaViewModel: CrearCuentaViewModel,
+    usuarioViewModel: UsuarioViewModel,
     navController: NavHostController,
     listadoTareasViewModel: ListadoTareasViewModel,
     loginViewModel: LoginViewModel
@@ -108,20 +116,17 @@ fun Login(
                             //Las corrutinas son necesarias para que funcione el Toast. En este ejemplo no uso variables como en el registro y llamo directamente al Toast.
                             coroutineScope.launch {
                                 if (result.isSignedIn) {
-                                    Log.i("Sergio", "Login correcto")
 
-                                    if (loginViewModel.getRolByEmail(email) == 1) {
-                                        navController.navigate(Rutas.eleccionAdministrador)
-                                    }else{
-                                        navController.navigate(Rutas.principal)
-//                                      Toast.makeText(context, "Login correcto", Toast.LENGTH_SHORT).show()
-                                    }
+                                    Log.i("Sergio", "Login correcto_LoginScreen")
+                                    usuarioViewModel.buildUsuarioActualByEmail(email)
+                                    loginViewModel.setRegistroCorrecto(1)
 
                                 } else {
                                     Log.e("Sergio", "Algo ha fallado en el login")
                                     Toast.makeText(context, "Algo ha fallado en el login", Toast.LENGTH_SHORT).show()
                                 }
                             }
+
                         },
                         { error ->
                             coroutineScope.launch {
@@ -138,6 +143,23 @@ fun Login(
                         Toast.makeText(context, "Registro correcto", Toast.LENGTH_SHORT).show()
                         loginViewModel.disableLogin()
                         loginViewModel.enableLogout()
+                        usuarioViewModel.establecerUsuarioActual(InterVentana.usuarioActivo!!)
+                        usuarioViewModel.asignarUsuarioActualToAtributosSueltos()
+
+                        if (InterVentana.usuarioActivo!!.rol == Rutas.rolAdministrador) {
+                            navController.navigate(Rutas.eleccionAdministrador)
+//                            Log.i("Sergio", "Usuario actual: ${usuarioViewModel.usuarioActual.value!!.nombreCompleto}")
+//                            InterVentana.usuarioActivo = usuarioViewModel.usuarioActual.value!!
+                            Log.i("Sergio", "Usuario activo: ${InterVentana.usuarioActivo!!}")
+                        }
+                        if (InterVentana.usuarioActivo!!.rol == Rutas.rolProgramador) {
+                            listadoTareasViewModel.getTareasNoFinalizadas()
+                            navController.navigate(Rutas.listadoTareas)
+//                            Log.i("Sergio", "Usuario actual: ${usuarioViewModel.usuarioActual.value!!.nombreCompleto}")
+//                            InterVentana.usuarioActivo = usuarioViewModel.usuarioActual.value!!
+                            Log.i("Sergio", "Usuario activo: ${InterVentana.usuarioActivo!!}")
+                        }
+
                     }
                     if (isRegistroCorrecto == 2) {
                         Toast.makeText(context, "Algo ha fallado en el registro", Toast.LENGTH_SHORT)
@@ -149,26 +171,9 @@ fun Login(
             Spacer(modifier = Modifier.size(200.dp))
             CerrarSesionYAplicacion(context = context)
             crearCuenta {
+                crearCuentaViewModel.limpiarAtributosSueltos()
                 navController.navigate(Rutas.crearCuenta)
             }
-//            Logout(isLogoutEnable){
-//                val options = AuthSignOutOptions.builder()
-//                    .globalSignOut(true)
-//                    .build()
-//
-//                Amplify.Auth.signOut(options) { signOutResult ->
-//                    coroutineScope.launch {
-//                        if (signOutResult is AWSCognitoAuthSignOutResult.CompleteSignOut) {
-//                            Log.i("Fernando", "Logout correcto")
-//                            Toast.makeText(context,"Logout ok",Toast.LENGTH_SHORT).show()
-//                        } else if (signOutResult is AWSCognitoAuthSignOutResult.PartialSignOut) {
-//                        } else if (signOutResult is AWSCognitoAuthSignOutResult.FailedSignOut) {
-//                            Log.e("Fernando", "Algo ha fallado en el logout")
-//                            Toast.makeText(context,"Algo ha fallado en el logout",Toast.LENGTH_SHORT).show()
-//                        }
-//                    }
-//                }
-//            }
 
         }
 
@@ -313,7 +318,6 @@ fun CerrarSesionYAplicacion(context: Context){
 //        activity.finish()
          }) {
         Text(text = "Cerrar aplicación")
-
     }
 }
 

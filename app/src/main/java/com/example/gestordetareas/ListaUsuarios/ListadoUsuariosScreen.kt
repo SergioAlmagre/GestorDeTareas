@@ -7,7 +7,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,14 +22,10 @@ import androidx.compose.material.icons.filled.AllInclusive
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.House
-import androidx.compose.material.icons.filled.HowToReg
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.NewLabel
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -61,7 +56,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -70,10 +64,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.amplifyframework.datastore.generated.model.Usuario
+import com.example.gestordetareas.ElementosComunes.InterVentana
 import com.example.gestordetareas.R
-import com.example.gestordetareas.Rutas
+import com.example.gestordetareas.ElementosComunes.Rutas
 import com.example.gestordetareas.Usuario.UsuarioViewModel
-//import com.example.gestordetareas.Usuario.Usuario
+//import com.example.gestordetareas.ObjetosGemelos.Usuario
 import kotlinx.coroutines.launch
 
 
@@ -107,27 +102,24 @@ fun ListadoUsuarios(navController: NavController, listadoUsuariosViewModel: List
 
                         if (selectedItemMiOpcion.opcion == "Volver") {
                             navController.navigate(Rutas.eleccionAdministrador)
-
                         }
                         if (selectedItemMiOpcion.opcion == "Todos") {
-
-
+                            listadoUsuariosViewModel.getUsers()
                         }
                         if (selectedItemMiOpcion.opcion == "Top (+) tareas realizadas") {
-
-
+                            listadoUsuariosViewModel.geTop3MasTareas()
                         }
                         if (selectedItemMiOpcion.opcion == "Top (-) tareas realizadas") {
-
-
+                            listadoUsuariosViewModel.geTop3MenosTareas()
                         }
                         if (selectedItemMiOpcion.opcion == "Crear usuario") {
+                            usuarioViewModel.limpiarAtributosSueltos()
                             navController.navigate(Rutas.crearCuenta)
-
                         }
                         if (selectedItemMiOpcion.opcion == "Mis datos") {
-
-
+                            usuarioViewModel.establecerUsuarioActual(InterVentana.usuarioActivo!!)
+                            usuarioViewModel.asignarUsuarioActualToAtributosSueltos()
+                            navController.navigate(Rutas.modUsuario)
                         }
                         if (selectedItemMiOpcion.opcion == "Cerrar sesión") {
                             listadoUsuariosViewModel.cerrarSesión()
@@ -215,7 +207,10 @@ fun RVUsuariosSticky(listadoUsuariosViewModel: ListadoUsuariosViewModel, navCont
 //                        Almacen.usu = usu
                         Log.i("Sergio", "Usuario seleccionado antes: $usu")
                         usuarioViewModel.establecerUsuarioActual(usu)
-                        navController.navigate(Rutas.perfilUsuarioVistaAdministrador)
+                        usuarioViewModel.asignarUsuarioActualToAtributosSueltos()
+//                        usuarioViewModel.gemelearUsuarioActualVM()
+
+                        navController.navigate(Rutas.modUsuario)
                         Log.i("Sergio", "Usuario seleccionado despues: $usu")
 //                        Toast.makeText(context, "Usuario seleccionado: $usu", Toast.LENGTH_SHORT).show()
                     }

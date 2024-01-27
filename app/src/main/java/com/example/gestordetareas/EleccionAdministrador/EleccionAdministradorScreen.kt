@@ -17,17 +17,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.gestordetareas.Rutas
+import com.example.gestordetareas.ElementosComunes.Rutas
+import com.example.gestordetareas.ListaUsuarios.ListadoUsuariosViewModel
+import com.example.gestordetareas.ListadoTareas.ListadoTareasViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun botonesSeleccion(navController: NavController){
+fun botonesSeleccion(listadoUsuariosViewModel: ListadoUsuariosViewModel,listadoTareasViewModel: ListadoTareasViewModel ,navController: NavController){
     Column(
         modifier = Modifier
             .fillMaxWidth()
     ) {
         Card(
-            onClick = { navController.navigate(Rutas.listadoUsuarios) },
+            onClick = { listadoUsuariosViewModel.getUsers()
+                navController.navigate(Rutas.listadoUsuarios) },
             modifier = Modifier
                 .padding(10.dp)
                 .width(400.dp)
@@ -44,7 +47,8 @@ fun botonesSeleccion(navController: NavController){
             }
         }
         Card(
-            onClick = { navController.navigate(Rutas.listadoTareas) },
+            onClick = { listadoTareasViewModel.getTodasLasTareas()
+                navController.navigate(Rutas.listadoTareas) },
             modifier = Modifier
                 .padding(10.dp)
                 .width(400.dp)

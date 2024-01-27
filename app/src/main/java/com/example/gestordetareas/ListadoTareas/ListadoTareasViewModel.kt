@@ -1,13 +1,7 @@
 package com.example.gestordetareas.ListadoTareas
 
-import android.app.Activity
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,9 +9,7 @@ import com.amplifyframework.auth.cognito.result.AWSCognitoAuthSignOutResult
 import com.amplifyframework.auth.options.AuthSignOutOptions
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.generated.model.Tarea
-import com.amplifyframework.datastore.generated.model.Usuario
-import kotlinx.coroutines.launch
-
+import com.example.gestordetareas.ElementosComunes.InterVentana
 
 class ListadoTareasViewModel : ViewModel() {
     private val _tareas = mutableStateListOf<Tarea>()
@@ -58,6 +50,10 @@ class ListadoTareasViewModel : ViewModel() {
         _tareaActual.value = tarea
     }
 
+    fun establecerInterTarea(interTarea: Tarea) {
+         InterVentana.tareaActiva = interTarea
+    }
+
     fun borrarTarea(tarea: Tarea) {
         _tareas.remove(tarea)
         Amplify.DataStore.delete(tarea,
@@ -83,7 +79,7 @@ class ListadoTareasViewModel : ViewModel() {
         )
     }
 
-    fun getTareasRealizadas() {
+    fun getTareasFinalizadas() {
         _tareas.clear()
         Amplify.DataStore.query(
             com.amplifyframework.datastore.generated.model.Tarea::class.java,
@@ -141,25 +137,8 @@ class ListadoTareasViewModel : ViewModel() {
             { items ->
                 while (items.hasNext()) {
                     val item = items.next()
-                    if(item.usuarioTarea.id == id){
-                        Log.i("Sergio", "Queried item: ${item.toString()}")
-                        _tareas.add(item)
-                    }
-                }
-            },
-            { failure -> Log.e("Sergio", "Could not query DataStore", failure) }
-        )
-    }
-
-    fun getMisTareas(id: String) {
-        _tareas.clear()
-        Amplify.DataStore.query(
-            com.amplifyframework.datastore.generated.model.Tarea::class.java,
-            { items ->
-                while (items.hasNext()) {
-                    val item = items.next()
-                    if(item.usuarioTarea.id == id){
-                        Log.i("Sergio", "Queried item: ${item.toString()}")
+                    if(item.tareaUsuarioTareaId == id){
+                        Log.i("Sergio", "Queried item IdUsuario: ${item.toString()}")
                         _tareas.add(item)
                     }
                 }
@@ -201,6 +180,9 @@ class ListadoTareasViewModel : ViewModel() {
             .estaFinalizada(false)
             .build()
     }
+
+
+
 
 
 

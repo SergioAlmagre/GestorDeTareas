@@ -6,11 +6,16 @@ import androidx.lifecycle.MutableLiveData
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.model.query.Where
 import com.amplifyframework.datastore.generated.model.Tarea
+import com.example.gestordetareas.ElementosComunes.InterVentana
+import java.util.concurrent.CompletableFuture
 
 class TareaViewModel {
 
     private val _idUsuarioAsignado = MutableLiveData<String>()
     val idUsuarioAsignado: LiveData<String> = _idUsuarioAsignado
+
+    private val _idTarea = MutableLiveData<String>()
+    val idTarea: LiveData<String> = _idTarea
 
     private val _tareaActual = MutableLiveData<Tarea>()
     val tareaActual: LiveData<Tarea> = _tareaActual
@@ -49,6 +54,10 @@ class TareaViewModel {
 
     fun setIdUsuarioAsignado(id: String?) {
         this._idUsuarioAsignado.value = id
+    }
+
+    fun setIdTarea(id: String?) {
+        this._idTarea.value = id
     }
 
     fun cambiarEstaAsignada(it: Boolean) {
@@ -114,31 +123,56 @@ class TareaViewModel {
         )
     }
 
-    fun crearTarea(
-        descripcion: String,
-        dificultad: String,
-        estimacionHoras: Double,
-        horasInvertidas: Double,
-        estaAsignada: Boolean,
-        estaFinalizada: Boolean
-    ) {
-        val t = com.amplifyframework.datastore.generated.model.Tarea.builder()
-            .descripcion(descripcion).estimacionHoras(estimacionHoras)
-            .horasInvertidas(horasInvertidas).dificultad(dificultad)
-            .estaFinalizada(estaFinalizada).estaAsignada(estaAsignada).build()
+
+    fun guardarModificarTarea(tarea: Tarea): CompletableFuture<Boolean> {
+        val completableFuture = CompletableFuture<Boolean>()
+
         Amplify.DataStore.save(
-            t,
-            { success -> Log.i("Sergio", "Saved task: " + success.item().toString()) },
-            { error -> Log.e("Sergio", "Could not save item to DataStore", error) }
+            tarea,
+            { success ->
+                println("Tarea guardada correctamente")
+                completableFuture.complete(true)
+            },
+            { error ->
+                println("Error al guardar la tarea: $error")
+                completableFuture.complete(false)
+            }
         )
+        return completableFuture
     }
 
-    fun limpiarDatos(){
+    fun limpiarAtributosSueltos(){
         this._descripcion.value = ""
         this._estimacionHoras.value = 0.0
         this._dificultad.value = ""
         this._estaFinalizada.value = false
     }
+
+    fun obtenerTareaLimpia(): Tarea {
+        return Tarea.builder()
+            .descripcion("")
+            .dificultad("")
+            .estimacionHoras(0.0)
+            .horasInvertidas(0.0)
+            .estaAsignada(false)
+            .estaFinalizada(false)
+            .build()
+    }
+
+    fun getTareaByAtributosSueltos(): Tarea {
+        return Tarea.builder()
+            .id(_idTarea.value)
+            .descripcion(_descripcion.value)
+            .dificultad(_dificultad.value)
+            .estimacionHoras(_estimacionHoras.value)
+            .horasInvertidas(_horasInvertidas.value)
+            .estaAsignada(_estaAsignada.value)
+            .estaFinalizada(_estaFinalizada.value)
+            .tareaUsuarioTareaId(_idUsuarioAsignado.value)
+            .build()
+    }
+
+
 
     fun calcularPorcentaje(horasInvertidas: Double, estimacionHoras: Double): String {
         var porcentaje = 0
@@ -174,5 +208,25 @@ class TareaViewModel {
             descripcion = _tareaActual.value!!.descripcion
         }
         return descripcion
+    }
+
+//    fun gemelearTareaActualVM(){
+//        InterVentana.tarea!!.id = _tareaActual.value!!.id
+//        InterVentana.tarea!!.descripcion = _tareaActual.value!!.descripcion
+//        InterVentana.tarea!!.dificultad = _tareaActual.value!!.dificultad
+//        InterVentana.tarea!!.estimacionHoras = _tareaActual.value!!.estimacionHoras
+//        InterVentana.tarea!!.horasInvertidas = _tareaActual.value!!.horasInvertidas
+//        InterVentana.tarea!!.estaAsignada = _tareaActual.value!!.estaAsignada
+//        InterVentana.tarea!!.estaFinalizada = _tareaActual.value!!.estaFinalizada
+//    }
+
+    fun asignarInterTareaToAtributos(){
+        this._idTarea.value = InterVentana.tareaActiva!!.id
+        this._descripcion.value = InterVentana.tareaActiva!!.descripcion
+        this._dificultad.value = InterVentana.tareaActiva!!.dificultad
+        this._estimacionHoras.value = InterVentana.tareaActiva!!.estimacionHoras
+        this._horasInvertidas.value = InterVentana.tareaActiva!!.horasInvertidas
+        this._estaAsignada.value = InterVentana.tareaActiva!!.estaAsignada
+        this._estaFinalizada.value = InterVentana.tareaActiva!!.estaFinalizada
     }
 }

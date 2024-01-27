@@ -58,16 +58,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.amplifyframework.datastore.generated.model.Tarea
+import com.example.gestordetareas.ElementosComunes.InterVentana
 import com.example.gestordetareas.ListaUsuarios.MiToolBar
 import com.example.gestordetareas.ListaUsuarios.OpcionMenu
-import com.example.gestordetareas.Rutas
+import com.example.gestordetareas.Usuario.ModUsuarioViewModel
+import com.example.gestordetareas.ElementosComunes.Rutas
+import com.example.gestordetareas.Tarea.TareaViewModel
 import com.example.gestordetareas.Usuario.UsuarioViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListadoTareas(usuarioViewModel: UsuarioViewModel ,navController: NavController, listadoTareasViewModel: ListadoTareasViewModel){
+fun ListadoTareas( tareaViewModel: TareaViewModel ,modUsuario: ModUsuarioViewModel, usuarioViewModel: UsuarioViewModel, navController: NavController, listadoTareasViewModel: ListadoTareasViewModel){
     var snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -77,15 +83,15 @@ fun ListadoTareas(usuarioViewModel: UsuarioViewModel ,navController: NavControll
     var scope = rememberCoroutineScope()
     var expanded by remember { mutableStateOf(false) }
 
-    usuarioViewModel.cambiarRol(Rutas.rolAdministrador) // TESSSSST!!!!!!!!!!!!!!!!!!
-    usuarioViewModel.cambiarId("1") // TESSSSST!!!!!!!!!!!!!!!!!!
+//    usuarioViewModel.cambiarRol(Rutas.rolAdministrador) // TESSSSST!!!!!!!!!!!!!!!!!!
+//    usuarioViewModel.cambiarId("1") // TESSSSST!!!!!!!!!!!!!!!!!!
 
     val act = LocalContext.current as Activity
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
         ModalDrawerSheet {
             Spacer(Modifier.height(12.dp))
 
-            if(usuarioViewModel.rol.value == Rutas.rolAdministrador){
+            if(InterVentana.usuarioActivo!!.rol == Rutas.rolAdministrador){
                 opcsAdmin.forEach {
                     NavigationDrawerItem(
                         icon = { Icon(it.icono, contentDescription = it.opcion) },
@@ -100,33 +106,25 @@ fun ListadoTareas(usuarioViewModel: UsuarioViewModel ,navController: NavControll
 
                             if (selectedItemMiOpcion.opcion == "Volver") {
                                 navController.navigate(Rutas.eleccionAdministrador)
-
                             }
                             if (selectedItemMiOpcion.opcion == "Crear tarea") {
                                 listadoTareasViewModel.establecerTareaActual(listadoTareasViewModel.obatenerTareaVacia())
+                                tareaViewModel.limpiarAtributosSueltos()
                                 navController.navigate(Rutas.verTarea)
-
                             }
                             if (selectedItemMiOpcion.opcion == "Todas") {
                                 listadoTareasViewModel.getTodasLasTareas()
-
                             }
-                            if (selectedItemMiOpcion.opcion == "Realizadas") {
-                                listadoTareasViewModel.getTareasRealizadas()
-
+                            if (selectedItemMiOpcion.opcion == "Finalizadas") {
+                                listadoTareasViewModel.getTareasFinalizadas()
                             }
-                            if (selectedItemMiOpcion.opcion == "Sin asignar") {
+                            if (selectedItemMiOpcion.opcion == "Sin finalizar") {
                                 listadoTareasViewModel.getTareasSinAsignar()
-
                             }
                             if (selectedItemMiOpcion.opcion == "De usuario") {
-                                listadoTareasViewModel.getTareasDeUsuarioPorId("1")
+                                listadoTareasViewModel.getTareasDeUsuarioPorId(InterVentana.usuarioActivo!!.id)
                             }
 
-                            if (selectedItemMiOpcion.opcion == "Mis datos") {
-
-
-                            }
                             if (selectedItemMiOpcion.opcion == "Cerrar sesión") {
                                 listadoTareasViewModel.cerrarSesiónList()
                                 act.finish()
@@ -137,7 +135,7 @@ fun ListadoTareas(usuarioViewModel: UsuarioViewModel ,navController: NavControll
                     )
                 }
             }
-            if(usuarioViewModel.rol.value == Rutas.rolProgramador){
+            if(InterVentana.usuarioActivo!!.rol == Rutas.rolProgramador){
                 opcsProg.forEach {
                     NavigationDrawerItem(
                         icon = { Icon(it.icono, contentDescription = it.opcion) },
@@ -147,18 +145,17 @@ fun ListadoTareas(usuarioViewModel: UsuarioViewModel ,navController: NavControll
                             scope.launch {
                                 drawerState.close()
                             }
-                            selectedItemMiOpcion = it //Aquí obtenemos el seleccionado.
-//                            OpcionElegida.eleccion = it.opcion
+                            selectedItemMiOpcion = it
 
                             if (selectedItemMiOpcion.opcion == "Todas") {
-                                listadoTareasViewModel.getTodasLasTareas()
+                                listadoTareasViewModel.getTareasNoFinalizadas()
                             }
                             if (selectedItemMiOpcion.opcion == "Mis tareas") {
-                                listadoTareasViewModel.getMisTareas(usuarioViewModel.id.value!!)
+                                listadoTareasViewModel.getTareasDeUsuarioPorId(InterVentana.usuarioActivo!!.id)
 
                             }
                             if (selectedItemMiOpcion.opcion == "Mis datos") {
-
+                                navController.navigate(Rutas.modUsuario)
                             }
                             if (selectedItemMiOpcion.opcion == "Cerrar sesión") {
                                 listadoTareasViewModel.cerrarSesiónList()
@@ -207,7 +204,7 @@ fun ListadoTareas(usuarioViewModel: UsuarioViewModel ,navController: NavControll
 
             Column(modifier = Modifier.padding(padding)) {
 
-            TareasList(listadoTareasViewModel, navController)
+            TareasList(tareaViewModel ,listadoTareasViewModel, navController)
 
             }
         }
@@ -218,7 +215,7 @@ fun ListadoTareas(usuarioViewModel: UsuarioViewModel ,navController: NavControll
 
 
 @Composable
-fun TareasList(listadoTareasViewModel: ListadoTareasViewModel, navController: NavController) {
+fun TareasList(tareaViewModel: TareaViewModel ,listadoTareasViewModel: ListadoTareasViewModel, navController: NavController) {
     val tareas = listadoTareasViewModel.tareas
     val context = LocalContext.current
     val showDialogBorrar: Boolean by listadoTareasViewModel.showDialogBorrar.observeAsState(false)
@@ -227,19 +224,29 @@ fun TareasList(listadoTareasViewModel: ListadoTareasViewModel, navController: Na
         items(tareas) { tarea ->
             ItemTareaLista(t = tarea){ tar, tipo -> //Llamada a la función lamda clickable del card en ItemTarea
                 if (tipo == 1) {//Click
-                    Log.e("Fernando","Click pulsado")
+                    Log.e("Sergio","Click pulsado")
 
-                    navController.navigate(Rutas.verTarea)
-                    listadoTareasViewModel.establecerTareaActual(tar)
-                    Toast.makeText(context, "Usuario sel: $tar", Toast.LENGTH_SHORT).show()
+                    runBlocking {
+                        val trabajo: Job = launch(context = Dispatchers.Default) {
+                            listadoTareasViewModel.establecerInterTarea(tar)
+                        }
+
+                        trabajo.join()
+                        Log.i("Sergio", "Tarea activa: ${InterVentana.tareaActiva.toString()}")
+                        tareaViewModel.asignarInterTareaToAtributos()
+                        navController.navigate(Rutas.verTarea)
+//                        Toast.makeText(context, "Tarea sel: $tar", Toast.LENGTH_SHORT).show()
+                    }
+
                 }
                 if (tipo == 2){//Long click
-
                     listadoTareasViewModel.borrarTarea(tar)
-                    Log.e("Fernando","Long click pulsado")
+                    tareaViewModel.limpiarAtributosSueltos()
+                    listadoTareasViewModel.establecerInterTarea(tareaViewModel.obtenerTareaLimpia())
+                    Log.e("Sergio","Long click pulsado")
                 }
                 if (tipo == 3){//Double click
-                    Log.e("Fernando","Double click pulsado")
+                    Log.e("Sergio","Double click pulsado")
                 }
             }
         }
@@ -263,15 +270,7 @@ fun TareasList(listadoTareasViewModel: ListadoTareasViewModel, navController: Na
 fun ItemTareaLista(t : Tarea, onItemSeleccionado:(Tarea, Int)->Unit){
     var isLongClick by remember { mutableStateOf(false) }
     var isClick by remember { mutableStateOf(false) }
-    var isDoubleClick by remember { mutableStateOf(false) }
     var context = LocalContext.current
-    var descripcion: String by remember { mutableStateOf(t.descripcion) }
-    var dificultad: String by remember { mutableStateOf(t.dificultad) }
-    var estimacionHoras: Double by remember { mutableStateOf(t.estimacionHoras) }
-    var horasInvertidas: Double by remember { mutableStateOf(t.horasInvertidas) }
-    var estaAsignada: Boolean by remember { mutableStateOf(t.estaAsignada) }
-    var estaFinalizada: Boolean by remember { mutableStateOf(t.estaFinalizada) }
-
 
     // Variable para mostrar o no el diálogo de confirmación
     var showDialog by remember { mutableStateOf(false) }
@@ -352,8 +351,8 @@ fun ItemTareaLista(t : Tarea, onItemSeleccionado:(Tarea, Int)->Unit){
 
 
 fun generarOpcionesMenuTareasAdministrador() : ArrayList<OpcionMenu> {
-    var titulos = listOf("Volver","Crear tarea" , "Todas", "Realizadas", "Sin realizar", "Sin asignar", "De usuario",  "Mis datos", "Cerrar sesión")
-    var iconos =  listOf(Icons.Default.ArrowBack, Icons.Default.NewLabel, Icons.Default.AllInclusive ,Icons.Default.Done, Icons.Default.Work, Icons.Default.HowToReg, Icons.Default.Search, Icons.Default.House, Icons.Default.ExitToApp)
+    var titulos = listOf("Volver","Crear tarea" , "Todas", "Finalizadas", "Sin finalizar", "Sin asignar", "De usuario",  "Cerrar sesión")
+    var iconos =  listOf(Icons.Default.ArrowBack, Icons.Default.NewLabel, Icons.Default.AllInclusive ,Icons.Default.Done, Icons.Default.Work, Icons.Default.HowToReg, Icons.Default.Search, Icons.Default.ExitToApp)
     var opciones= ArrayList<OpcionMenu>()
     for(i in 0..titulos.size-1){
         opciones.add(OpcionMenu(titulos.get(i), iconos.get(i)))

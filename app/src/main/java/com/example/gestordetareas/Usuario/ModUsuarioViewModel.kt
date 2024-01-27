@@ -1,4 +1,4 @@
-package com.example.gestordetareas.ModificarUsuario
+package com.example.gestordetareas.Usuario
 
 import android.util.Patterns
 import androidx.lifecycle.LiveData
