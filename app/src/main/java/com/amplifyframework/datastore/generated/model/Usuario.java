@@ -31,11 +31,13 @@ public final class Usuario implements Model {
   public static final QueryField NOMBRE_COMPLETO = field("Usuario", "nombreCompleto");
   public static final QueryField EMAIL = field("Usuario", "email");
   public static final QueryField TAREAS_FINALIZADAS = field("Usuario", "tareasFinalizadas");
+  public static final QueryField FOTO_PERFIL = field("Usuario", "fotoPerfil");
   private final @ModelField(targetType="ID", isRequired = true) String id;
   private final @ModelField(targetType="Int") Integer rol;
   private final @ModelField(targetType="String") String nombreCompleto;
   private final @ModelField(targetType="String") String email;
   private final @ModelField(targetType="Int") Integer tareasFinalizadas;
+  private final @ModelField(targetType="String") String fotoPerfil;
   private @ModelField(targetType="AWSDateTime", isReadOnly = true) Temporal.DateTime createdAt;
   private @ModelField(targetType="AWSDateTime", isReadOnly = true) Temporal.DateTime updatedAt;
   /** @deprecated This API is internal to Amplify and should not be used. */
@@ -64,6 +66,10 @@ public final class Usuario implements Model {
       return tareasFinalizadas;
   }
   
+  public String getFotoPerfil() {
+      return fotoPerfil;
+  }
+  
   public Temporal.DateTime getCreatedAt() {
       return createdAt;
   }
@@ -72,12 +78,13 @@ public final class Usuario implements Model {
       return updatedAt;
   }
   
-  private Usuario(String id, Integer rol, String nombreCompleto, String email, Integer tareasFinalizadas) {
+  private Usuario(String id, Integer rol, String nombreCompleto, String email, Integer tareasFinalizadas, String fotoPerfil) {
     this.id = id;
     this.rol = rol;
     this.nombreCompleto = nombreCompleto;
     this.email = email;
     this.tareasFinalizadas = tareasFinalizadas;
+    this.fotoPerfil = fotoPerfil;
   }
   
   @Override
@@ -93,6 +100,7 @@ public final class Usuario implements Model {
               ObjectsCompat.equals(getNombreCompleto(), usuario.getNombreCompleto()) &&
               ObjectsCompat.equals(getEmail(), usuario.getEmail()) &&
               ObjectsCompat.equals(getTareasFinalizadas(), usuario.getTareasFinalizadas()) &&
+              ObjectsCompat.equals(getFotoPerfil(), usuario.getFotoPerfil()) &&
               ObjectsCompat.equals(getCreatedAt(), usuario.getCreatedAt()) &&
               ObjectsCompat.equals(getUpdatedAt(), usuario.getUpdatedAt());
       }
@@ -106,6 +114,7 @@ public final class Usuario implements Model {
       .append(getNombreCompleto())
       .append(getEmail())
       .append(getTareasFinalizadas())
+      .append(getFotoPerfil())
       .append(getCreatedAt())
       .append(getUpdatedAt())
       .toString()
@@ -121,6 +130,7 @@ public final class Usuario implements Model {
       .append("nombreCompleto=" + String.valueOf(getNombreCompleto()) + ", ")
       .append("email=" + String.valueOf(getEmail()) + ", ")
       .append("tareasFinalizadas=" + String.valueOf(getTareasFinalizadas()) + ", ")
+      .append("fotoPerfil=" + String.valueOf(getFotoPerfil()) + ", ")
       .append("createdAt=" + String.valueOf(getCreatedAt()) + ", ")
       .append("updatedAt=" + String.valueOf(getUpdatedAt()))
       .append("}")
@@ -145,6 +155,7 @@ public final class Usuario implements Model {
       null,
       null,
       null,
+      null,
       null
     );
   }
@@ -154,7 +165,8 @@ public final class Usuario implements Model {
       rol,
       nombreCompleto,
       email,
-      tareasFinalizadas);
+      tareasFinalizadas,
+      fotoPerfil);
   }
   public interface BuildStep {
     Usuario build();
@@ -163,6 +175,7 @@ public final class Usuario implements Model {
     BuildStep nombreCompleto(String nombreCompleto);
     BuildStep email(String email);
     BuildStep tareasFinalizadas(Integer tareasFinalizadas);
+    BuildStep fotoPerfil(String fotoPerfil);
   }
   
 
@@ -172,16 +185,18 @@ public final class Usuario implements Model {
     private String nombreCompleto;
     private String email;
     private Integer tareasFinalizadas;
+    private String fotoPerfil;
     public Builder() {
       
     }
     
-    private Builder(String id, Integer rol, String nombreCompleto, String email, Integer tareasFinalizadas) {
+    private Builder(String id, Integer rol, String nombreCompleto, String email, Integer tareasFinalizadas, String fotoPerfil) {
       this.id = id;
       this.rol = rol;
       this.nombreCompleto = nombreCompleto;
       this.email = email;
       this.tareasFinalizadas = tareasFinalizadas;
+      this.fotoPerfil = fotoPerfil;
     }
     
     @Override
@@ -193,7 +208,8 @@ public final class Usuario implements Model {
           rol,
           nombreCompleto,
           email,
-          tareasFinalizadas);
+          tareasFinalizadas,
+          fotoPerfil);
     }
     
     @Override
@@ -220,6 +236,12 @@ public final class Usuario implements Model {
         return this;
     }
     
+    @Override
+     public BuildStep fotoPerfil(String fotoPerfil) {
+        this.fotoPerfil = fotoPerfil;
+        return this;
+    }
+    
     /**
      * @param id id
      * @return Current Builder instance, for fluent method chaining
@@ -232,8 +254,8 @@ public final class Usuario implements Model {
   
 
   public final class CopyOfBuilder extends Builder {
-    private CopyOfBuilder(String id, Integer rol, String nombreCompleto, String email, Integer tareasFinalizadas) {
-      super(id, rol, nombreCompleto, email, tareasFinalizadas);
+    private CopyOfBuilder(String id, Integer rol, String nombreCompleto, String email, Integer tareasFinalizadas, String fotoPerfil) {
+      super(id, rol, nombreCompleto, email, tareasFinalizadas, fotoPerfil);
       
     }
     
@@ -255,6 +277,11 @@ public final class Usuario implements Model {
     @Override
      public CopyOfBuilder tareasFinalizadas(Integer tareasFinalizadas) {
       return (CopyOfBuilder) super.tareasFinalizadas(tareasFinalizadas);
+    }
+    
+    @Override
+     public CopyOfBuilder fotoPerfil(String fotoPerfil) {
+      return (CopyOfBuilder) super.fotoPerfil(fotoPerfil);
     }
   }
   

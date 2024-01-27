@@ -78,28 +78,29 @@ class LoginViewModel:ViewModel() {
         _isLogoutOk.value = false
     }
 
-    fun getRolByEmail(email: String): Int ?{
-        var rol:Int = 1
-        Amplify.DataStore.query(
-            Usuario::class.java,
-            Where.matches(Usuario.EMAIL.eq(email)),
-            { usuarios ->
-                if (usuarios.hasNext()) {
-                    val usuario = usuarios.next()
-                    Log.d("Sergio", "Usuario encontrado: $usuario")
-                    Log.d("Sergio", "Rol del usuario: ${usuario.rol}")
-                    rol = usuario.rol
-                } else {
-                    Log.d("Sergio", "Usuario no encontrado para el email: $email")
-                }
-            },
-            { exception ->
-                Log.e("Sergio", "Error al buscar el usuario por email: $email", exception)
-
-            }
-        )
-        return rol
-    }
+//
+//    fun getRolByEmail(email: String): Int ?{
+//        var rol:Int = 1
+//        Amplify.DataStore.query(
+//            Usuario::class.java,
+//            Where.matches(Usuario.EMAIL.eq(email)),
+//            { usuarios ->
+//                if (usuarios.hasNext()) {
+//                    val usuario = usuarios.next()
+//                    Log.d("Sergio", "Usuario encontrado: $usuario")
+//                    Log.d("Sergio", "Rol del usuario: ${usuario.rol}")
+//                    rol = usuario.rol
+//                } else {
+//                    Log.d("Sergio", "Usuario no encontrado para el email: $email")
+//                }
+//            },
+//            { exception ->
+//                Log.e("Sergio", "Error al buscar el usuario por email: $email", exception)
+//
+//            }
+//        )
+//        return rol
+//    }
 
 
 

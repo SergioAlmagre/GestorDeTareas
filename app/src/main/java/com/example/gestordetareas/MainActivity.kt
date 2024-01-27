@@ -1,5 +1,6 @@
 package com.example.gestordetareas
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -9,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
@@ -19,58 +21,80 @@ import com.amplifyframework.api.aws.AWSApiPlugin
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.AWSDataStorePlugin
-import com.example.a2_practicamvvm.Rutas
-import com.example.gestordetareas.CrearCuenta.CrearCuenta
+import com.example.gestordetareas.CrearCuenta.CrearUsuario
 import com.example.gestordetareas.CrearCuenta.CrearCuentaViewModel
 import com.example.gestordetareas.EleccionAdministrador.botonesSeleccion
-import com.example.gestordetareas.ListadoTareas.Listado
+import com.example.gestordetareas.ElementosComunes.Rutas
+import com.example.gestordetareas.ListaUsuarios.ListadoUsuarios
+import com.example.gestordetareas.ListaUsuarios.ListadoUsuariosViewModel
+
+import com.example.gestordetareas.ListadoTareas.ListadoTareas
 import com.example.gestordetareas.ListadoTareas.ListadoTareasViewModel
 import com.example.gestordetareas.Login.Login
-import com.example.gestordetareas.Principal.Principal
-import com.example.gestordetareas.Principal.PrincipalViewModel
+
 import com.example.gestordetareas.Usuario.UsuarioViewModel
 import com.example.gestordetareas.ui.theme.GestorDeTareasTheme
 
 import com.example.gestordetareas.Login.LoginViewModel
+import com.example.gestordetareas.Usuario.ModUsuarioViewModel
+import com.example.gestordetareas.Usuario.ModificarUsuario
+import com.example.gestordetareas.Tarea.TareaViewModel
+import com.example.gestordetareas.Tarea.VerTarea
 
 class MainActivity : ComponentActivity() {
-    val princiaplVM = PrincipalViewModel()
-    val listadoVM = ListadoTareasViewModel()
+    val listadoTareasVM = ListadoTareasViewModel()
     val usuarioVM = UsuarioViewModel()
+    val tareaVM = TareaViewModel()
     val loginVM = LoginViewModel()
     val crearCuentaVM = CrearCuentaViewModel()
+    val listadoUsuariosVM = ListadoUsuariosViewModel()
+    val modificarUsuarioVM = ModUsuarioViewModel()
 
+    @SuppressLint("CoroutineCreationDuringComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
             GestorDeTareasTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-
                     val navController = rememberNavController()
-                    NavHost(navController = navController, startDestination = Rutas.EleccionAdministrador){
+                    LaunchedEffect(true) {
+                        listadoUsuariosVM.getUsers()
+                    }
 
-                        composable(Rutas.EleccionAdministrador){
-                            botonesSeleccion(navController)
+                    NavHost(navController = navController, startDestination = Rutas.login){
+
+                        composable(Rutas.verTarea){
+                            VerTarea(listadoTareasVM ,listadoUsuariosVM ,usuarioVM, navController, tareaVM)
                         }
 
-                        composable(Rutas.CrearCuenta){
-                            CrearCuenta(navController,usuarioVM, crearCuentaVM )
+                        composable(Rutas.listadoTareas){
+                            ListadoTareas(tareaVM ,modificarUsuarioVM ,usuarioVM,navController, listadoTareasVM)
                         }
 
-                        composable(Rutas.Login){
-                            Login(navController, princiaplVM, listadoVM, loginVM)
+                        composable(Rutas.listadoUsuarios){
+                            ListadoUsuarios(navController, listadoUsuariosVM, usuarioVM)
                         }
-                        composable(Rutas.Principal){
-                            Principal(navController, princiaplVM, listadoVM)
+
+                        composable(Rutas.eleccionAdministrador){
+                            botonesSeleccion(listadoUsuariosVM,listadoTareasVM,navController)
                         }
-                        composable(Rutas.ListadoTareas){
-                            Listado(navController, princiaplVM, listadoVM)
+
+                        composable(Rutas.crearCuenta){
+                            CrearUsuario(navController,usuarioVM, crearCuentaVM )
                         }
+
+                        composable(Rutas.login){
+                            Login(crearCuentaVM, usuarioVM ,navController, listadoTareasVM, loginVM)
+                        }
+
+                        composable(Rutas.modUsuario){
+                            ModificarUsuario(navController, usuarioVM, modificarUsuarioVM,listadoUsuariosVM)
+                        }
+
                     }
                     try{
                         Amplify.addPlugin(AWSApiPlugin()) // UNCOMMENT this line once backend is deployed

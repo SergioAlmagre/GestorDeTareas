@@ -66,4 +66,12 @@ class CrearCuentaViewModel {
     fun disableLogin(){
         _isRegistrarEnable.value = false
     }
+
+    fun limpiarAtributosSueltos(){
+        _email.value = ""
+        _pwd.value = ""
+        _pwd2.value = ""
+        _nombre.value = ""
+    }
+
 }

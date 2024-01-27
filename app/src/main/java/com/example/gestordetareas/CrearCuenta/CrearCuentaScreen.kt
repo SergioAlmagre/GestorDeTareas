@@ -58,8 +58,9 @@ import com.amplifyframework.auth.AuthUserAttributeKey
 import com.amplifyframework.auth.options.AuthSignUpOptions
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.generated.model.Usuario
-import com.example.a2_practicamvvm.Rutas
-
+import com.example.gestordetareas.ElementosComunes.BotonCancelar
+import com.example.gestordetareas.ElementosComunes.InterVentana
+import com.example.gestordetareas.ElementosComunes.Rutas
 import com.example.gestordetareas.Usuario.UsuarioViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -68,7 +69,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CrearCuenta(
+fun CrearUsuario(
     navController: NavHostController,
     usuarioViewModel: UsuarioViewModel,
     crearCuentaViewModel: CrearCuentaViewModel
@@ -163,11 +164,19 @@ fun CrearCuenta(
                                         //Las corrutinas son necesarias para que funcione el Toast. En este ejemplo no uso variables como en el registro y llamo directamente al Toast.
                                         coroutineScope.launch {
                                             if (result.isSignedIn) {
-                                                Log.i("Fernando", "Login correcto")
-                                                navController.navigate(Rutas.Principal)
-                                                Toast.makeText(context, "Login correcto", Toast.LENGTH_SHORT).show()
+                                                // ATENTO A ESTA PARTE, POSIBLES FALLOS
+                                                if(InterVentana.usuarioActivo!!.rol == 0){
+                                                    navController.navigate(Rutas.listadoUsuarios)
+                                                    Log.i("Sergio", "Login correcto")
+                                                    Toast.makeText(context, "Login correcto", Toast.LENGTH_SHORT).show()
+                                                }
+                                                if(InterVentana.usuarioActivo!!.rol == 1){
+                                                    navController.navigate(Rutas.listadoTareas)
+                                                    Log.i("Sergio", "Login correcto")
+                                                    Toast.makeText(context, "Login correcto", Toast.LENGTH_SHORT).show()
+                                                }
                                             } else {
-                                                Log.e("Fernando", "Algo ha fallado en el login")
+                                                Log.e("Sergio", "Algo ha fallado en el login")
                                                 Toast.makeText(context, "Algo ha fallado en el login", Toast.LENGTH_SHORT).show()
                                             }
                                         }
@@ -219,7 +228,7 @@ fun CrearCuenta(
                                         usu).thenAccept { success ->
                                         if (success) {
                                             GlobalScope.launch(Dispatchers.Main) {//Para que se ejecute en el hilo principal
-                                                navController.navigate(Rutas.Principal)
+                                                navController.navigate(Rutas.listadoTareas)
                                             }
 
                                         } else {
@@ -260,10 +269,14 @@ fun CrearCuenta(
             }
             ReenviarCodigoVerificacion()
             Spacer(modifier = Modifier.size(40.dp))
-            Cancelar(navController)
+            if(InterVentana.usuarioActivo != null){
+                BotonCancelar(navController, Rutas.listadoUsuarios)
+            }else{
+                BotonCancelar(navController, Rutas.login)
+            }
+
 
         }
-
     }
 }
 
@@ -421,19 +434,7 @@ fun CodigoVerificacionBox(codigoVerificacion: String, onTextChanged: (String) ->
 }
 
 
-@Composable
-fun Cancelar(navController: NavHostController) {
-    Button(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = { navController.navigate(Rutas.Login) },
-        colors = ButtonDefaults.buttonColors(
-            contentColor = Color.White,
-            disabledContentColor = Color.White
-        )
-    ) {
-        Text(text = "Cancelar")
-    }
-}
+
 
 @Composable
 fun RegistrarYEnviarCodVerificacion(isRegistroEnable : Boolean, onClickAction: (Boolean) -> Unit){

@@ -5,16 +5,6 @@
         "project": {
             "ConflictHandler": "AUTOMERGE",
             "ConflictDetection": "VERSION"
-        },
-        "models": {
-            "Tarea": {
-                "ConflictHandler": "AUTOMERGE",
-                "ConflictDetection": "VERSION"
-            },
-            "Usuario": {
-                "ConflictHandler": "AUTOMERGE",
-                "ConflictDetection": "VERSION"
-            }
         }
     }
 }
