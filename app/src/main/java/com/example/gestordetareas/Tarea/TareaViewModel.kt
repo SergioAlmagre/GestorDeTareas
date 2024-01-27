@@ -160,6 +160,16 @@ class TareaViewModel {
     }
 
     fun getTareaByAtributosSueltos(): Tarea {
+        if(_estaAsignada.value == null){
+            _estaAsignada.value = false
+        }
+        if(_dificultad.value == null){
+            _dificultad.value = ""
+        }
+        if(horasInvertidas.value == null){
+            _horasInvertidas.value = 0.0
+        }
+
         return Tarea.builder()
             .id(_idTarea.value)
             .descripcion(_descripcion.value)
@@ -209,16 +219,6 @@ class TareaViewModel {
         }
         return descripcion
     }
-
-//    fun gemelearTareaActualVM(){
-//        InterVentana.tarea!!.id = _tareaActual.value!!.id
-//        InterVentana.tarea!!.descripcion = _tareaActual.value!!.descripcion
-//        InterVentana.tarea!!.dificultad = _tareaActual.value!!.dificultad
-//        InterVentana.tarea!!.estimacionHoras = _tareaActual.value!!.estimacionHoras
-//        InterVentana.tarea!!.horasInvertidas = _tareaActual.value!!.horasInvertidas
-//        InterVentana.tarea!!.estaAsignada = _tareaActual.value!!.estaAsignada
-//        InterVentana.tarea!!.estaFinalizada = _tareaActual.value!!.estaFinalizada
-//    }
 
     fun asignarInterTareaToAtributos(){
         this._idTarea.value = InterVentana.tareaActiva!!.id

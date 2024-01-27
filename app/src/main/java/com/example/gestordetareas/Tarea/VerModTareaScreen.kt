@@ -150,6 +150,7 @@ fun TareaVerBody(
                     setExpanded = { isExpanded = it },
                     setSelected = {}
                 )
+                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             }
             if(InterVentana.usuarioActivo!!.rol == Rutas.rolProgramador){
                 if (tareaViewModel.estaAsignadaONull(estaAsignada)) {
@@ -246,6 +247,8 @@ fun TareaVerBody(
             Spacer(modifier = Modifier.size(40.dp))
             Button(
                 onClick = {
+                    tareaViewModel.limpiarAtributosSueltos()
+                    listadoTareasViewModel.establecerTareaActual(tareaViewModel.obtenerTareaLimpia())
                     navController.navigate(Rutas.listadoTareas)
                     onDismiss()
                 }) {
@@ -269,7 +272,6 @@ fun TareaVerBody(
                 if(estaFinalizada){
                     usuarioViewModel.guardarModificarUsuario(InterVentana.usuarioActivo!!)
                 }
-
                 navController.navigate(Rutas.listadoTareas)
                 onDismiss()
             }) {
@@ -279,37 +281,13 @@ fun TareaVerBody(
     }
 }
 
-//
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun DropDownUsuariosVerTarea(listadoUsuariosViewModel: ListadoUsuariosViewModel, isExpanded: Boolean, setExpanded: (Boolean) -> Unit, setSelected:(String)->Unit) {
-//    var expanded by remember { mutableStateOf(false) }
-////    var usuarios = listOf<String>("Álvaro", "José", "Lorenzo", "Ramón", "Sergio", "María")
-//    val usuarios = listadoUsuariosViewModel.usuarios.map { it.nombreCompleto }
-//    Column(modifier = Modifier.padding(10.dp)) {
-//        DropdownMenu(expanded = isExpanded, onDismissRequest = {
-//            setExpanded(false)
-//        })
-//        {
-//            usuarios.forEach {
-//                DropdownMenuItem(text = { Text(text = it) }, onClick = {
-//                    setExpanded (false)
-//                    setSelected(it)
-//                })
-//            }
-//        }
-//    }
-//}
-
-
 
 
 @Composable
 fun dificualtadListVer(tareaViewModel: TareaViewModel): String {
-//    var diChoosed by remember {
-//        mutableStateOf("")
-//    }
-    var diChoosed: String = tareaViewModel.dificultad.value.toString()
+    var diChoosed by remember {
+        mutableStateOf(tareaViewModel.dificultad.value)
+    }
 
     Column(
         Modifier.fillMaxWidth(),
@@ -347,7 +325,9 @@ fun dificualtadListVer(tareaViewModel: TareaViewModel): String {
         }
 
     }
-    return diChoosed
+
+    tareaViewModel.cambiarDificultad(diChoosed!!)
+    return diChoosed as String
 }
 
 @Composable
@@ -361,7 +341,6 @@ fun mostrarPorcentaje(tareaViewModel: TareaViewModel){
         Text("0%", fontSize = 20.sp, fontWeight = FontWeight.Bold)
     }
 }
-
 
 
 

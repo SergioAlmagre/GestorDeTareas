@@ -19,6 +19,8 @@ import androidx.navigation.compose.rememberNavController
 import com.amplifyframework.AmplifyException
 import com.amplifyframework.api.aws.AWSApiPlugin
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
+import com.amplifyframework.auth.cognito.result.AWSCognitoAuthSignOutResult
+import com.amplifyframework.auth.options.AuthSignOutOptions
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.AWSDataStorePlugin
 import com.example.gestordetareas.CrearCuenta.CrearUsuario
@@ -60,6 +62,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+
                     val navController = rememberNavController()
                     LaunchedEffect(true) {
                         listadoUsuariosVM.getUsers()
@@ -107,18 +110,31 @@ class MainActivity : ComponentActivity() {
                         Log.e("Sergio", "Could not initialize Amplify", e)
                     }
 
-                    //Cognito
-//                    val email = "sergioalmagre@gmail.com"
-//                    val pass = "Chubac@2024"
-//                        Conexion.registrarUsuario(email, pass)
-//                        Conexion.confirmar(email, pass,201819)
-//                        Conexion.loginUsuario(email, pass)
-
+                    // Cerrar sesión al iniciar la aplicación
+                    LaunchedEffect(true) {
+                        signOut()
+                    }
                 }
             }
         }
     }
+    private fun signOut() {
+        val options = AuthSignOutOptions.builder()
+            .globalSignOut(true)
+            .build()
+
+        Amplify.Auth.signOut(options) { signOutResult ->
+            if (signOutResult is AWSCognitoAuthSignOutResult.CompleteSignOut) {
+                Log.i("Sergio", "Logout correcto")
+            } else if (signOutResult is AWSCognitoAuthSignOutResult.FailedSignOut) {
+                Log.e("Sergio", "Algo ha fallado en el logout")
+            }
+        }
+    }
+
 }
+
+
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {

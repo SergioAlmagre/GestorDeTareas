@@ -31,8 +31,15 @@ class LoginViewModel:ViewModel() {
     private val _isLogoutOk = MutableLiveData<Boolean>()
     val isLogoutOk : LiveData<Boolean> = _isLogoutOk
 
+    private val _isLoginOk = MutableLiveData<Boolean>()
+    val isLoginOk : LiveData<Boolean> = _isLoginOk
+
     private val _isRegistroCorrecto = MutableLiveData<Int>()
     val isRegistroCorrecto : LiveData<Int> = _isRegistroCorrecto
+
+    fun setIsLoginOk(valor:Boolean){
+        _isLoginOk.postValue(valor)
+    }
 
     /**
      * 0 -> registro no realizado

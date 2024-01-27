@@ -1,5 +1,6 @@
 package com.example.gestordetareas.ListadoTareas
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.LiveData
@@ -150,6 +151,7 @@ class ListadoTareasViewModel : ViewModel() {
 
 
 
+    @SuppressLint("SuspiciousIndentation")
     fun cerrarSesiónList(){
         val options = AuthSignOutOptions.builder()
             .globalSignOut(true)

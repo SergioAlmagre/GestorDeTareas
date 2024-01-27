@@ -47,7 +47,8 @@ fun botonesSeleccion(listadoUsuariosViewModel: ListadoUsuariosViewModel,listadoT
             }
         }
         Card(
-            onClick = { listadoTareasViewModel.getTodasLasTareas()
+            onClick = {
+                listadoTareasViewModel.getTodasLasTareas()
                 navController.navigate(Rutas.listadoTareas) },
             modifier = Modifier
                 .padding(10.dp)

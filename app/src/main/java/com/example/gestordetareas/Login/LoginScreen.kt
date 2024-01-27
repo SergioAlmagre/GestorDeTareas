@@ -83,6 +83,7 @@ fun Login(
     val isRegistroCorrecto:Int by loginViewModel.isRegistroCorrecto.observeAsState(initial = 0)
     var isLogoutCorrecto by remember { mutableStateOf(value = 0) }
     val coroutineScope = rememberCoroutineScope()
+    val isLoginOk:Boolean by loginViewModel.isLoginOk.observeAsState(initial = false)
 
     Box(
         Modifier
@@ -120,6 +121,7 @@ fun Login(
                                     Log.i("Sergio", "Login correcto_LoginScreen")
                                     usuarioViewModel.buildUsuarioActualByEmail(email)
                                     loginViewModel.setRegistroCorrecto(1)
+                                    loginViewModel.setIsLoginOk(true)
 
                                 } else {
                                     Log.e("Sergio", "Algo ha fallado en el login")
@@ -140,25 +142,10 @@ fun Login(
                 }
                 finally {
                     if (isRegistroCorrecto == 1) {
-                        Toast.makeText(context, "Registro correcto", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Registro correcto Login", Toast.LENGTH_SHORT).show()
                         loginViewModel.disableLogin()
                         loginViewModel.enableLogout()
-                        usuarioViewModel.establecerUsuarioActual(InterVentana.usuarioActivo!!)
-                        usuarioViewModel.asignarUsuarioActualToAtributosSueltos()
 
-                        if (InterVentana.usuarioActivo!!.rol == Rutas.rolAdministrador) {
-                            navController.navigate(Rutas.eleccionAdministrador)
-//                            Log.i("Sergio", "Usuario actual: ${usuarioViewModel.usuarioActual.value!!.nombreCompleto}")
-//                            InterVentana.usuarioActivo = usuarioViewModel.usuarioActual.value!!
-                            Log.i("Sergio", "Usuario activo: ${InterVentana.usuarioActivo!!}")
-                        }
-                        if (InterVentana.usuarioActivo!!.rol == Rutas.rolProgramador) {
-                            listadoTareasViewModel.getTareasNoFinalizadas()
-                            navController.navigate(Rutas.listadoTareas)
-//                            Log.i("Sergio", "Usuario actual: ${usuarioViewModel.usuarioActual.value!!.nombreCompleto}")
-//                            InterVentana.usuarioActivo = usuarioViewModel.usuarioActual.value!!
-                            Log.i("Sergio", "Usuario activo: ${InterVentana.usuarioActivo!!}")
-                        }
 
                     }
                     if (isRegistroCorrecto == 2) {
@@ -166,10 +153,24 @@ fun Login(
                             .show()
                     }
                 }
+            }
 
+            if(isLoginOk){
+                usuarioViewModel.establecerUsuarioActual(InterVentana.usuarioActivo!!)
+                usuarioViewModel.asignarUsuarioActualToAtributosSueltos()
+
+                if (InterVentana.usuarioActivo!!.rol == Rutas.rolAdministrador) {
+                    navController.navigate(Rutas.eleccionAdministrador)
+                    Log.i("Sergio", "Usuario activo Login: ${InterVentana.usuarioActivo!!}")
+                }
+                if (InterVentana.usuarioActivo!!.rol == Rutas.rolProgramador) {
+                    listadoTareasViewModel.getTareasNoFinalizadas()
+                    navController.navigate(Rutas.listadoTareas)
+                    Log.i("Sergio", "Usuario activo Login: ${InterVentana.usuarioActivo!!}")
+                }
             }
             Spacer(modifier = Modifier.size(200.dp))
-            CerrarSesionYAplicacion(context = context)
+//            CerrarSesionYAplicacion(context = context)
             crearCuenta {
                 crearCuentaViewModel.limpiarAtributosSueltos()
                 navController.navigate(Rutas.crearCuenta)
