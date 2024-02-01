@@ -1,5 +1,9 @@
 package com.example.gestordetareas.Usuario
 
+import android.content.Context
+import android.database.Cursor
+import android.net.Uri
+import android.provider.MediaStore
 import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -37,6 +41,9 @@ class ModUsuarioViewModel {
     fun disableLogin(){
         _isRegistrarEnable.value = false
     }
+
+
+
 
 
 

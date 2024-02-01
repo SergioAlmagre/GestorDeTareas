@@ -23,6 +23,7 @@ import com.amplifyframework.auth.cognito.result.AWSCognitoAuthSignOutResult
 import com.amplifyframework.auth.options.AuthSignOutOptions
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.AWSDataStorePlugin
+import com.example.app_mvvm_aws.Imagenes.ImagenViewModel
 import com.example.gestordetareas.CrearCuenta.CrearUsuario
 import com.example.gestordetareas.CrearCuenta.CrearCuentaViewModel
 import com.example.gestordetareas.EleccionAdministrador.botonesSeleccion
@@ -51,6 +52,7 @@ class MainActivity : ComponentActivity() {
     val crearCuentaVM = CrearCuentaViewModel()
     val listadoUsuariosVM = ListadoUsuariosViewModel()
     val modificarUsuarioVM = ModUsuarioViewModel()
+    val imagenViewModel = ImagenViewModel()
 
     @SuppressLint("CoroutineCreationDuringComposition")
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -1,16 +1,30 @@
 package com.example.gestordetareas.Usuario
 
+import android.content.Context
+import android.database.Cursor
+import android.net.Uri
+import android.provider.MediaStore
 import android.util.Log
 import android.util.Patterns
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.model.query.Where
 import com.amplifyframework.datastore.generated.model.Usuario
 import com.example.gestordetareas.ElementosComunes.InterVentana
+import com.example.gestordetareas.ElementosComunes.Rutas
+
+import java.io.File
 import java.util.concurrent.CompletableFuture
 
+
+
 class UsuarioViewModel {
+
+    private val _imagenesS3 : ArrayList<String> by mutableStateOf(arrayListOf())
+    val imagenesS3 : ArrayList<String> = _imagenesS3
 
     private var _usuarioActual = MutableLiveData<Usuario?>()
     var usuarioActual: LiveData<Usuario?> = _usuarioActual
@@ -38,6 +52,9 @@ class UsuarioViewModel {
 
     private val _isLogoutOk = MutableLiveData<Boolean>()
     val isLogoutOk : LiveData<Boolean> = _isLogoutOk
+
+    private val _onImageSelected = MutableLiveData<Boolean>()
+    val onImageSelected : LiveData<Boolean> = _onImageSelected
 
     private val _isRegistroCorrecto = MutableLiveData<Int>()
     val isRegistroCorrecto : LiveData<Int> = _isRegistroCorrecto
@@ -193,7 +210,7 @@ class UsuarioViewModel {
         cambiarEmail(usuarioActual.value!!.email)
         cambiarId(usuarioActual.value!!.id)
         cambiarTareasFinalizadas(usuarioActual.value!!.tareasFinalizadas)
-        cambiarFotoPerfil("usuarioActual.value!!.fotoPerfil") // REVISAR ORIGEN DE DATOS PORQUE PILLA UN NULL SI USO USUARIOACTUAL.VALUE.....
+        cambiarFotoPerfil(usuarioActual.value!!.fotoPerfil) // REVISAR ORIGEN DE DATOS PORQUE PILLA UN NULL SI USO USUARIOACTUAL.VALUE.....
     }
 
     fun obtenerUsuarioVacio(): Usuario {
@@ -230,7 +247,89 @@ class UsuarioViewModel {
     }
 
 
+    fun getGenericImageUrl() {
+        _fotoPerfil.value = Rutas.imagenPerfilDefault
+    }
 
+
+    fun getRealPathFromURI(context: Context, uri: Uri): String? {
+        var cursor: Cursor? = null
+        return try {
+            val proj = arrayOf(MediaStore.Images.Media.DATA)
+            cursor = context.contentResolver.query(uri, proj, null, null, null)
+            val columnIndex = cursor?.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+            cursor?.moveToFirst()
+            columnIndex?.let {
+                cursor?.getString(it)
+            }
+        } finally {
+            cursor?.close()
+        }
+    }
+
+
+
+    fun subirImagenAAWS(context: Context ,uri: Uri) {
+    // Obtener el contexto actual
+//    val context = LocalContext.current
+
+    // Obtener el archivo desde la URI
+    val archivo = File(getRealPathFromURI(context, uri))
+
+        // Subir el archivo a AWS utilizando Amplify Storage
+        Amplify.Storage.uploadFile(
+            _id.value!!,  // Ruta en el bucket de AWS
+            archivo,
+            { result ->
+                // Éxito al subir el archivo, obtén la URL de la imagen en AWS
+                obtenerUrlAWS(result.key, context)
+            },
+            { error ->
+                // Manejar error al subir el archivo
+                Log.e("SubidaAWS", "Error al subir la imagen a AWS: $error")
+            }
+        )
+    }
+
+        fun obtenerUrlAWS(key: String, context: Context) {
+        // Obtener la URL de la imagen en AWS utilizando Amplify Storage
+            Amplify.Storage.getUrl(key,
+                { url ->
+                    // Éxito al obtener la URL, actualiza el ViewModel con la URL de la imagen en AWS
+                    _fotoPerfil.value!!.toString()
+                },
+                { error ->
+                    // Manejar error al obtener la URL
+                    Log.e("ObtenerUrlAWS", "Error al obtener la URL de la imagen en AWS: $error")
+                }
+            )
+        }
+
+
+
+
+//    private fun subirImagenAAWS(context: Context,  uri: Uri) {
+//        // Obtener el contexto actual
+//
+//
+//        // Obtener el archivo desde la URI
+//        val archivo = File(getRealPathFromURI(context, uri))
+//
+//        // Subir el archivo a AWS utilizando Amplify Storage
+//        Amplify.Storage.uploadFile(
+//            "fotosperfil/" + usuarioViewModel.getIdUsuarioActual(),  // Ruta en el bucket de AWS
+//            archivo,
+//            { result ->
+//                // Éxito al subir el archivo, obtén la URL de la imagen en AWS
+//                obtenerUrlAWS(result.key, context)
+//            },
+//            { error ->
+//                // Manejar error al subir el archivo
+//                Log.e("SubidaAWS", "Error al subir la imagen a AWS: $error")
+//            }
+//        )
+//    }
+//
 
 
 

@@ -222,7 +222,7 @@ fun CrearUsuario(
                                         Toast.LENGTH_SHORT
                                     ).show()
 
-                                    var usu = Usuario.builder().rol(Rutas.rolProgramador).nombreCompleto(nombre).email(email).tareasFinalizadas(0).build()
+                                    var usu = Usuario.builder().rol(Rutas.rolProgramador).nombreCompleto(nombre).email(email).tareasFinalizadas(0).fotoPerfil(Rutas.imagenPerfilDefault).build()
 
                                     usuarioViewModel.insertarUsuario(
                                         usu).thenAccept { success ->

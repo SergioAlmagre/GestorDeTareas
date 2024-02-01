@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AllInclusive
 import androidx.compose.material.icons.filled.ArrowBack
@@ -54,6 +55,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -68,6 +70,7 @@ import com.example.gestordetareas.ElementosComunes.InterVentana
 import com.example.gestordetareas.R
 import com.example.gestordetareas.ElementosComunes.Rutas
 import com.example.gestordetareas.Usuario.UsuarioViewModel
+import com.google.accompanist.coil.rememberCoilPainter
 //import com.example.gestordetareas.ObjetosGemelos.Usuario
 import kotlinx.coroutines.launch
 
@@ -277,15 +280,24 @@ fun ItemUsuarioLista(u: Usuario, onItemSeleccionado: (Usuario, Int) -> Unit) {
                     .padding(6.dp)
                     .fillMaxWidth()
             ) {
-                if (u.fotoPerfil.isNullOrEmpty()) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_background),
-                        contentDescription = "Avatar",
-                        modifier = Modifier
-                            .size(100.dp)
-                            .padding(8.dp)
-                    )
-                }
+//                if (u.fotoPerfil == Rutas.imagenPerfilDefault) {
+//                    Image(
+//                        painter = painterResource(id = R.drawable.usuariorobot),
+//                        contentDescription = "Avatar",
+//                        modifier = Modifier
+//                            .size(100.dp)
+//                            .padding(8.dp)
+//                            .clip(CircleShape)
+//                    )
+//                }
+                Image(
+                    painter = rememberCoilPainter(
+                        request = u.fotoPerfil.toString(),
+                        fadeIn = true
+                    ),
+                    contentDescription = "Avatar",
+                    modifier = Modifier.size(100.dp)
+                )
                 // Centro el nombre en el Row
                 Text(
                     text = u.nombreCompleto,
