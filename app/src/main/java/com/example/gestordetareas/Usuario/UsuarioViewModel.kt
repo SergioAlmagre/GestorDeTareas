@@ -290,8 +290,6 @@ class UsuarioViewModel {
 
 
 
-
-
     fun subirFotoDePerfil(context: Context, uri: Uri) {
         Log.i("SubidaAWS", "Subiendo la imagen a AWS")
         val rutaArchivo = getRealPathFromURI(context, uri)

@@ -56,7 +56,7 @@ class ListadoUsuariosViewModel {
 
     fun getTop3MasTareas() {
 //        myScope.launch { // Problemas con la visualización de los usuarios
-//            getUsers() // La idea es obtenerlos todo primero porque si pasas de los mas a los menos la fuente _usuarios solo tiene 3 usuarios
+//            getUsers() // La idea es obtenerlos todos primero porque si pasas de los mas a los menos la fuente _usuarios solo tiene 3 usuarios
             _esOrdenado.value = false
             _usuarios.sortBy { it.tareasFinalizadas }
 
@@ -150,11 +150,11 @@ class ListadoUsuariosViewModel {
         Amplify.Auth.signOut(options) { signOutResult ->
 
             if (signOutResult is AWSCognitoAuthSignOutResult.CompleteSignOut) {
-                Log.i("Fernando", "Logout correcto")
+                Log.i("Sergio", "Logout correcto")
 
             } else if (signOutResult is AWSCognitoAuthSignOutResult.PartialSignOut) {
             } else if (signOutResult is AWSCognitoAuthSignOutResult.FailedSignOut) {
-                Log.e("Fernando", "Algo ha fallado en el logout")
+                Log.e("Sergio", "Algo ha fallado en el logout")
 
             } else {
 

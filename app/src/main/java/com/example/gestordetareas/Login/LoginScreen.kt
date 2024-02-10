@@ -1,5 +1,6 @@
 package com.example.gestordetareas.Login
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.util.Log
 import android.widget.Toast
@@ -59,11 +60,13 @@ import com.example.gestordetareas.Usuario.UsuarioViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 
 
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun Login(
     crearCuentaViewModel: CrearCuentaViewModel,
@@ -118,10 +121,12 @@ fun Login(
                             coroutineScope.launch {
                                 if (result.isSignedIn) {
 
-                                    Log.i("Sergio", "Login correcto_LoginScreen")
-                                    usuarioViewModel.buildUsuarioActualByEmail(email)
-                                    loginViewModel.setRegistroCorrecto(1)
-                                    loginViewModel.setIsLoginOk(true)
+
+                                        Log.i("Sergio", "Login correcto_LoginScreen")
+                                        usuarioViewModel.buildUsuarioActualByEmail(email)
+                                        loginViewModel.setRegistroCorrecto(1)
+                                        loginViewModel.setIsLoginOk(true)
+
 
                                 } else {
                                     Log.e("Sergio", "Algo ha fallado en el login")
@@ -146,6 +151,20 @@ fun Login(
                         loginViewModel.disableLogin()
                         loginViewModel.enableLogout()
 
+                        if(isLoginOk){
+                            usuarioViewModel.establecerUsuarioActual(InterVentana.usuarioActivo!!)
+                            usuarioViewModel.asignarUsuarioActualToAtributosSueltos()
+
+                            if (InterVentana.usuarioActivo!!.rol == Rutas.rolAdministrador) {
+                                navController.navigate(Rutas.eleccionAdministrador)
+                                Log.i("Sergio", "Usuario activo Login: ${InterVentana.usuarioActivo!!}")
+                            }
+                            if (InterVentana.usuarioActivo!!.rol == Rutas.rolProgramador) {
+                                listadoTareasViewModel.getTareasNoFinalizadas()
+                                navController.navigate(Rutas.listadoTareas)
+                                Log.i("Sergio", "Usuario activo Login: ${InterVentana.usuarioActivo!!}")
+                            }
+                        }
 
                     }
                     if (isRegistroCorrecto == 2) {
@@ -155,20 +174,8 @@ fun Login(
                 }
             }
 
-            if(isLoginOk){
-                usuarioViewModel.establecerUsuarioActual(InterVentana.usuarioActivo!!)
-                usuarioViewModel.asignarUsuarioActualToAtributosSueltos()
 
-                if (InterVentana.usuarioActivo!!.rol == Rutas.rolAdministrador) {
-                    navController.navigate(Rutas.eleccionAdministrador)
-                    Log.i("Sergio", "Usuario activo Login: ${InterVentana.usuarioActivo!!}")
-                }
-                if (InterVentana.usuarioActivo!!.rol == Rutas.rolProgramador) {
-                    listadoTareasViewModel.getTareasNoFinalizadas()
-                    navController.navigate(Rutas.listadoTareas)
-                    Log.i("Sergio", "Usuario activo Login: ${InterVentana.usuarioActivo!!}")
-                }
-            }
+
             Spacer(modifier = Modifier.size(200.dp))
 //            CerrarSesionYAplicacion(context = context)
             crearCuenta {

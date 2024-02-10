@@ -137,7 +137,7 @@ fun ModificarUsuario(
             }
 
             BotonGuardarDatosModUsu(navController,
-                Rutas.listadoUsuarios, usuarioViewModel, listadoUsuariosViewModel)
+                 usuarioViewModel, listadoUsuariosViewModel)
             if(InterVentana.usuarioActivo!!.rol == Rutas.rolProgramador){
                 BotonCancelarVerModUsuarios(navController, Rutas.listadoTareas)
             }
@@ -441,7 +441,7 @@ fun TareasFinalizadasTextBoxNoEdit(usuarioViewModel: UsuarioViewModel){
 
 
 @Composable
-fun BotonGuardarDatosModUsu(navController: NavController, ruta:String, usuarioViewModel: UsuarioViewModel, listadoUsuariosViewModel: ListadoUsuariosViewModel) {
+fun BotonGuardarDatosModUsu(navController: NavController, usuarioViewModel: UsuarioViewModel, listadoUsuariosViewModel: ListadoUsuariosViewModel) {
 //    var usuarioActual = usuarioViewModel.obtenerUsuarioActual()
 //    usuarioViewModel.cambiarId("1")     ///RESVISAR ORIGEN DE DATOS!!!!!!!!!
 //    usuarioViewModel.cambiarNombreUsuarioActual("Sergio Núñez Bautista") ///RESVISAR ORIGEN DE DATOS!!!!!!!!!
@@ -463,7 +463,12 @@ fun BotonGuardarDatosModUsu(navController: NavController, ruta:String, usuarioVi
             listadoUsuariosViewModel.getUsers()
             Log.i("Sergio", "Boton guardar:" + usuarioViewModel.toString())
             Log.i("Sergio", "Boton guardar:" + usu)
-            navController.navigate(ruta)
+
+            if(InterVentana.usuarioActivo!!.rol == Rutas.rolProgramador){
+                navController.navigate(Rutas.listadoTareas)
+            }else{
+                navController.navigate(Rutas.listadoUsuarios)
+            }
         },
         modifier = Modifier
             .fillMaxWidth(),

@@ -101,34 +101,36 @@ fun ListadoTareas( tareaViewModel: TareaViewModel ,modUsuario: ModUsuarioViewMod
                                 drawerState.close()
                             }
                             selectedItemMiOpcion = it //Aquí obtenemos el seleccionado.
-//                            OpcionElegida.eleccion = it.opcion
 
-                            if (selectedItemMiOpcion.opcion == "Volver") {
-                                navController.navigate(Rutas.eleccionAdministrador)
-                            }
-                            if (selectedItemMiOpcion.opcion == "Crear tarea") {
-                                listadoTareasViewModel.establecerTareaActual(listadoTareasViewModel.obtenerTareaVacia())
-                                tareaViewModel.limpiarAtributosSueltos()
-                                navController.navigate(Rutas.verTarea)
-                            }
-                            if (selectedItemMiOpcion.opcion == "Todas") {
-                                listadoTareasViewModel.getTodasLasTareas()
-                            }
-                            if (selectedItemMiOpcion.opcion == "Finalizadas") {
-                                listadoTareasViewModel.getTareasFinalizadas()
-                            }
-                            if (selectedItemMiOpcion.opcion == "Sin finalizar") {
-                                listadoTareasViewModel.getTareasNoFinalizadas()
-                            }
-                            if(selectedItemMiOpcion.opcion == "Sin asignar"){
-                                listadoTareasViewModel.getTareasSinAsignar()
-                            }
-                            if (selectedItemMiOpcion.opcion == "De usuario") {
-                                listadoTareasViewModel.getTareasDeUsuarioPorId(InterVentana.usuarioActivo!!.id)
-                            }
-                            if (selectedItemMiOpcion.opcion == "Cerrar sesión") {
-                                listadoTareasViewModel.cerrarSesiónList()
-                                act.finish()
+                            when (selectedItemMiOpcion.opcion) {
+                                "Volver" -> {
+                                    navController.navigate(Rutas.eleccionAdministrador)
+                                }
+                                "Crear tarea" -> {
+                                    listadoTareasViewModel.establecerTareaActual(listadoTareasViewModel.obtenerTareaVacia())
+                                    tareaViewModel.limpiarAtributosSueltos()
+                                    navController.navigate(Rutas.verTarea)
+                                }
+                                "Todas" -> {
+                                    listadoTareasViewModel.getTodasLasTareas()
+                                }
+                                "Finalizadas" -> {
+                                    listadoTareasViewModel.getTareasFinalizadas()
+                                }
+                                "Sin finalizar" -> {
+                                    listadoTareasViewModel.getTareasNoFinalizadas()
+                                }
+                                "Sin asignar" -> {
+                                    listadoTareasViewModel.getTareasSinAsignar()
+                                }
+                                "De usuario" -> {
+                                    listadoTareasViewModel.getTareasDeUsuarioPorId(InterVentana.usuarioActivo!!.id)
+                                }
+                                "Cerrar sesión" -> {
+                                    listadoTareasViewModel.cerrarSesiónList()
+                                    act.finish()
+                                }
+
                             }
 
                         },
@@ -148,19 +150,20 @@ fun ListadoTareas( tareaViewModel: TareaViewModel ,modUsuario: ModUsuarioViewMod
                             }
                             selectedItemMiOpcion = it
 
-                            if (selectedItemMiOpcion.opcion == "Todas") {
-                                listadoTareasViewModel.getTareasNoFinalizadas()
-                            }
-                            if (selectedItemMiOpcion.opcion == "Mis tareas") {
-                                listadoTareasViewModel.getTareasDeUsuarioPorId(InterVentana.usuarioActivo!!.id)
-
-                            }
-                            if (selectedItemMiOpcion.opcion == "Mis datos") {
-                                navController.navigate(Rutas.modUsuario)
-                            }
-                            if (selectedItemMiOpcion.opcion == "Cerrar sesión") {
-                                listadoTareasViewModel.cerrarSesiónList()
-                                act.finish()
+                            when (selectedItemMiOpcion.opcion) {
+                                "Todas" -> {
+                                    listadoTareasViewModel.getTareasNoFinalizadas()
+                                }
+                                "Mis tareas" -> {
+                                    listadoTareasViewModel.getTareasDeUsuarioPorId(InterVentana.usuarioActivo!!.id)
+                                }
+                                "Mis datos" -> {
+                                    navController.navigate(Rutas.modUsuario)
+                                }
+                                "Cerrar sesión" -> {
+                                    listadoTareasViewModel.cerrarSesiónList()
+                                    act.finish()
+                                }
                             }
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
