@@ -16,6 +16,6 @@ object Rutas {
 
 
     //IMAGENES
-    val imagenPerfilDefault = "https://c8.alamy.com/compes/2hma88e/icono-de-perfil-de-usuario-extranjero-simbolo-del-foro-de-avatar-marcador-de-posicion-para-redes-sociales-foros-cara-signo-de-internet-en-linea-2hma88e.jpg"
+    val imagenPerfilDefault = "https://mybucketgestortareas192331-staging.s3.eu-north-1.amazonaws.com/fotosperfil/usuariorobot.png"
 
 }

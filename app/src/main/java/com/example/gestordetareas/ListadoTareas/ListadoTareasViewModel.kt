@@ -172,14 +172,16 @@ class ListadoTareasViewModel : ViewModel() {
         }
     }
 
-    fun obatenerTareaVacia(): Tarea {
+    fun obtenerTareaVacia(): Tarea {
         return Tarea.builder()
+            .id("")
             .descripcion("")
             .dificultad("")
             .estimacionHoras(0.0)
             .horasInvertidas(0.0)
             .estaAsignada(false)
             .estaFinalizada(false)
+            .tareaUsuarioTareaId("")
             .build()
     }
 

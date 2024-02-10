@@ -81,7 +81,7 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(Rutas.listadoUsuarios){
-                            ListadoUsuarios(navController, listadoUsuariosVM, usuarioVM)
+                            ListadoUsuarios(navController, listadoUsuariosVM, usuarioVM, listadoTareasVM)
                         }
 
                         composable(Rutas.eleccionAdministrador){

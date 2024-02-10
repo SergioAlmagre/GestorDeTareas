@@ -107,7 +107,7 @@ fun ListadoTareas( tareaViewModel: TareaViewModel ,modUsuario: ModUsuarioViewMod
                                 navController.navigate(Rutas.eleccionAdministrador)
                             }
                             if (selectedItemMiOpcion.opcion == "Crear tarea") {
-                                listadoTareasViewModel.establecerTareaActual(listadoTareasViewModel.obatenerTareaVacia())
+                                listadoTareasViewModel.establecerTareaActual(listadoTareasViewModel.obtenerTareaVacia())
                                 tareaViewModel.limpiarAtributosSueltos()
                                 navController.navigate(Rutas.verTarea)
                             }
@@ -118,12 +118,14 @@ fun ListadoTareas( tareaViewModel: TareaViewModel ,modUsuario: ModUsuarioViewMod
                                 listadoTareasViewModel.getTareasFinalizadas()
                             }
                             if (selectedItemMiOpcion.opcion == "Sin finalizar") {
+                                listadoTareasViewModel.getTareasNoFinalizadas()
+                            }
+                            if(selectedItemMiOpcion.opcion == "Sin asignar"){
                                 listadoTareasViewModel.getTareasSinAsignar()
                             }
                             if (selectedItemMiOpcion.opcion == "De usuario") {
                                 listadoTareasViewModel.getTareasDeUsuarioPorId(InterVentana.usuarioActivo!!.id)
                             }
-
                             if (selectedItemMiOpcion.opcion == "Cerrar sesión") {
                                 listadoTareasViewModel.cerrarSesiónList()
                                 act.finish()

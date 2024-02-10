@@ -1,8 +1,13 @@
 package com.example.gestordetareas.CrearCuenta
 
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,9 +16,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -28,10 +35,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +62,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import com.amplifyframework.AmplifyException
 import com.amplifyframework.auth.AuthUserAttributeKey
@@ -61,11 +72,14 @@ import com.amplifyframework.datastore.generated.model.Usuario
 import com.example.gestordetareas.ElementosComunes.BotonCancelar
 import com.example.gestordetareas.ElementosComunes.InterVentana
 import com.example.gestordetareas.ElementosComunes.Rutas
+import com.example.gestordetareas.R
 import com.example.gestordetareas.Usuario.UsuarioViewModel
+import com.google.accompanist.coil.rememberCoilPainter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,8 +105,10 @@ fun CrearUsuario(
             .padding(8.dp)
     ) {
         Column {
-            Text("FOTO", fontSize = 150.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+//            Text("FOTO", fontSize = 150.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+            ImagenUsuario(usuarioViewModel) {
 
+            }
             Nombre(nombre){
                 crearCuentaViewModel.setNombre(it)
             }
@@ -481,4 +497,119 @@ fun ReenviarCodigoVerificacion() {
     )
 }
 
+@Composable
+fun ImagenUsuario(
+    usuarioViewModel: UsuarioViewModel,
+    onImageSelected: (String) -> Unit
+) {
+    val context = LocalContext.current
+    var isGalleryOpen by remember { mutableStateOf(false) }
+    val fotoPerfil: String by usuarioViewModel.fotoPerfil.observeAsState("")
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    selectedImageUri = fotoPerfil.toUri()
+    val esGuardar: Boolean by usuarioViewModel.esGuardar.observeAsState(false)
 
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            selectedImageUri = it
+            onImageSelected(it.toString())
+            usuarioViewModel.cambiarSelectedImageUri(it)
+        }
+    }
+
+    DisposableEffect(isGalleryOpen) {
+        if (isGalleryOpen) {
+            // Lanza la actividad de la galería utilizando ACTION_OPEN_DOCUMENT
+            launcher.launch("image/*")
+
+            // Marca el estado como cerrado después de seleccionar la imagen
+            isGalleryOpen = false
+        }
+
+        // Limpia el efecto cuando el compositor se desmonta
+        onDispose { }
+    }
+
+    Surface(
+        modifier = Modifier
+            .size(250.dp)
+            .fillMaxWidth()
+            .offset(x = 70.dp)
+            .clip(CircleShape)
+            .clickable {
+                // Cambia el estado para abrir la galería
+                isGalleryOpen = true
+            },
+    ) {
+        val archivo = selectedImageUri?.let { uri ->
+            usuarioViewModel.getRealPathFromURI(context, uri)?.let { ruta ->
+                File(ruta)
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .size(250.dp)
+                .padding(8.dp)
+        ) {
+            if (selectedImageUri != null && !selectedImageUri.toString().isNullOrBlank()){
+                Log.i("Sergio", "Imagen: " + selectedImageUri.toString())
+                // Si hay una URI de imagen seleccionada, muestra la imagen
+                Image(
+                    painter = rememberCoilPainter(
+                        request = selectedImageUri.toString(),
+                        fadeIn = true
+                    ),
+                    contentDescription = "Avatar",
+                    modifier = Modifier.size(250.dp)
+                )
+//
+//                if(esGuardar){
+//                    usuarioViewModel.cambiarFotoPerfil(selectedImageUri.toString())
+//                    usuarioViewModel.subirFotoDePerfil(context,selectedImageUri.toString().toUri())
+//                    usuarioViewModel.cambiarEsGuardar(false)
+//                    Log.i("Sergio", "Imagen: " + selectedImageUri.toString())
+//                }
+
+                // para probar a subir la imagen a lo bruto pero no la sube ni da error, probablemente sea algún problema de permisos
+//                archivo?.let {
+//                    Amplify.Storage.uploadFile(
+//                        "fotosperfil/${usuarioViewModel.id}",  // Ruta en el bucket de AWS
+//                        archivo,
+//                        { result ->
+//                            // Éxito al subir el archivo, obtén la URL de la imagen en AWS
+//                            Amplify.Storage.getUrl(
+//                                result.key,
+//                                { url ->
+//                                    // Éxito al obtener la URL, llama a la función de callback con la URL
+//                                    url.toString()
+//                                },
+//                                { error ->
+//                                    // Manejar error al obtener la URL
+//                                    Log.e("ObtenerUrlAWS", "Error al obtener la URL de la imagen en AWS: $error")
+//                                }
+//                            )
+//                        },
+//                        { error ->
+//                            // Manejar error al subir el archivo
+//                            Log.e("SubidaAWS", "Error al subir la imagen a AWS: $error")
+//                        }
+//                    )
+//                }
+
+            } else {
+                // Si no hay una imagen seleccionada, muestra la foto de perfil por defecto
+                Log.i("Sergio", "Dentro del else de imagen por defecto: " + selectedImageUri.toString())
+                Image(
+                    painter = rememberCoilPainter(
+                        request = Rutas.imagenPerfilDefault,
+                        fadeIn = true
+                    ),
+                    contentDescription = "Avatar",
+                    modifier = Modifier.size(250.dp)
+                )
+            }
+        }
+    }
+}

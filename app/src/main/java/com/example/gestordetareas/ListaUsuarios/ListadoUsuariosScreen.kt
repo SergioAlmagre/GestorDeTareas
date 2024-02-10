@@ -49,6 +49,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -69,6 +70,7 @@ import com.amplifyframework.datastore.generated.model.Usuario
 import com.example.gestordetareas.ElementosComunes.InterVentana
 import com.example.gestordetareas.R
 import com.example.gestordetareas.ElementosComunes.Rutas
+import com.example.gestordetareas.ListadoTareas.ListadoTareasViewModel
 import com.example.gestordetareas.Usuario.UsuarioViewModel
 import com.google.accompanist.coil.rememberCoilPainter
 //import com.example.gestordetareas.ObjetosGemelos.Usuario
@@ -77,7 +79,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListadoUsuarios(navController: NavController, listadoUsuariosViewModel: ListadoUsuariosViewModel, usuarioViewModel: UsuarioViewModel){
+fun ListadoUsuarios(navController: NavController, listadoUsuariosViewModel: ListadoUsuariosViewModel, usuarioViewModel: UsuarioViewModel, listadoTareasViewModel: ListadoTareasViewModel){
     // Variables necesarias para ModalNavigationDrawer y ModalDrawerSheet
     var snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -101,33 +103,36 @@ fun ListadoUsuarios(navController: NavController, listadoUsuariosViewModel: List
                         scope.launch {
                             drawerState.close()
                         }
-                        selectedItemMiOpcion = it //Aquí obtenemos el seleccionado.
+                        selectedItemMiOpcion = it
 
-                        if (selectedItemMiOpcion.opcion == "Volver") {
-                            navController.navigate(Rutas.eleccionAdministrador)
+                        when (selectedItemMiOpcion.opcion) {
+                            "Volver" -> {
+                                navController.navigate(Rutas.eleccionAdministrador)
+                            }
+                            "Todos" -> {
+                                listadoUsuariosViewModel.getUsers()
+                            }
+                            "Top (+) tareas realizadas" -> {
+                                listadoUsuariosViewModel.getTop3MasTareas()
+                            }
+                            "Top (-) tareas realizadas" -> {
+                                listadoUsuariosViewModel.getTop3MenosTareas()
+                            }
+                            "Crear usuario" -> {
+                                usuarioViewModel.limpiarAtributosSueltos()
+                                navController.navigate(Rutas.crearCuenta)
+                            }
+                            "Mis datos" -> {
+                                usuarioViewModel.establecerUsuarioActual(InterVentana.usuarioActivo!!)
+                                usuarioViewModel.asignarUsuarioActualToAtributosSueltos()
+                                navController.navigate(Rutas.modUsuario)
+                            }
+                            "Cerrar sesión" -> {
+                                listadoUsuariosViewModel.cerrarSesión()
+                                act.finish()
+                            }
                         }
-                        if (selectedItemMiOpcion.opcion == "Todos") {
-                            listadoUsuariosViewModel.getUsers()
-                        }
-                        if (selectedItemMiOpcion.opcion == "Top (+) tareas realizadas") {
-                            listadoUsuariosViewModel.geTop3MasTareas()
-                        }
-                        if (selectedItemMiOpcion.opcion == "Top (-) tareas realizadas") {
-                            listadoUsuariosViewModel.geTop3MenosTareas()
-                        }
-                        if (selectedItemMiOpcion.opcion == "Crear usuario") {
-                            usuarioViewModel.limpiarAtributosSueltos()
-                            navController.navigate(Rutas.crearCuenta)
-                        }
-                        if (selectedItemMiOpcion.opcion == "Mis datos") {
-                            usuarioViewModel.establecerUsuarioActual(InterVentana.usuarioActivo!!)
-                            usuarioViewModel.asignarUsuarioActualToAtributosSueltos()
-                            navController.navigate(Rutas.modUsuario)
-                        }
-                        if (selectedItemMiOpcion.opcion == "Cerrar sesión") {
-                            listadoUsuariosViewModel.cerrarSesión()
-                            act.finish()
-                        }
+
 
                     },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -184,38 +189,65 @@ fun ListadoUsuarios(navController: NavController, listadoUsuariosViewModel: List
 fun RVUsuariosSticky(listadoUsuariosViewModel: ListadoUsuariosViewModel, navController: NavController, usuarioViewModel: UsuarioViewModel) {
     val context = LocalContext.current
     var scope = rememberCoroutineScope()
+    val esOrdenado: Boolean by listadoUsuariosViewModel.esOrdenado.observeAsState(false)
 
+    if(esOrdenado){
+        val usuariosAgrupados = listadoUsuariosViewModel.usuarios.groupBy { it.nombreCompleto.first().toUpperCase() }
+        Log.i("Sergio_usuariosMostrar", usuariosAgrupados.toString())
 
-    val usuariosAgrupados = listadoUsuariosViewModel.usuarios.groupBy { it.nombreCompleto.first().toUpperCase() }
-    Log.i("Sergio_usuariosMostrar", usuariosAgrupados.toString())
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            usuariosAgrupados.forEach { (inicial, listaUsuarios) ->
+                stickyHeader {
+                    Text(
+                        text = inicial.toString(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(color = Color.White),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                items(listaUsuarios) {
+                    ItemUsuarioLista(u = it) { usu, tipo ->
+                        //Llamada a la función lambda clickable del card en ItemUsuario.
+                        if (tipo == 1) {//Click
+                            Log.e("Fernando", "Click pulsado")
+//                        Almacen.usu = usu
+                            Log.i("Sergio", "Usuario seleccionado antes: $usu")
+                            usuarioViewModel.establecerUsuarioActual(usu)
+                            usuarioViewModel.asignarUsuarioActualToAtributosSueltos()
+//                        usuarioViewModel.gemelearUsuarioActualVM()
 
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        usuariosAgrupados.forEach { (inicial, listaUsuarios) ->
-            stickyHeader {
-                Text(
-                    text = inicial.toString(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(color = Color.White),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
+                            navController.navigate(Rutas.modUsuario)
+                            Log.i("Sergio", "Usuario seleccionado despues: $usu")
+//                        Toast.makeText(context, "Usuario seleccionado: $usu", Toast.LENGTH_SHORT).show()
+                        }
+                        if (tipo == 2) {//Long click
+                            listadoUsuariosViewModel.borrarUsuario(usu)
+                            Log.e("Fernando", "Long click pulsado y borrado")
+                        }
+                        if (tipo == 3) {//Long click
+                            Log.e("Fernando", "Double click pulsado")
+                        }
+                    }
+                }
             }
-            items(listaUsuarios) {
-                ItemUsuarioLista(u = it) { usu, tipo ->
+        }
+
+    }else{
+        val listaUsuarios = listadoUsuariosViewModel.usuarios
+
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            items(listaUsuarios) { usuario ->
+                // Código para mostrar cada usuario en la lista
+                ItemUsuarioLista(u = usuario) { usu, tipo ->
                     //Llamada a la función lambda clickable del card en ItemUsuario.
                     if (tipo == 1) {//Click
                         Log.e("Fernando", "Click pulsado")
-//                        Almacen.usu = usu
-                        Log.i("Sergio", "Usuario seleccionado antes: $usu")
                         usuarioViewModel.establecerUsuarioActual(usu)
                         usuarioViewModel.asignarUsuarioActualToAtributosSueltos()
-//                        usuarioViewModel.gemelearUsuarioActualVM()
-
                         navController.navigate(Rutas.modUsuario)
-                        Log.i("Sergio", "Usuario seleccionado despues: $usu")
-//                        Toast.makeText(context, "Usuario seleccionado: $usu", Toast.LENGTH_SHORT).show()
                     }
                     if (tipo == 2) {//Long click
                         listadoUsuariosViewModel.borrarUsuario(usu)
@@ -227,7 +259,17 @@ fun RVUsuariosSticky(listadoUsuariosViewModel: ListadoUsuariosViewModel, navCont
                 }
             }
         }
+//        listadoUsuariosViewModel.cambiarEsOrdenado(true)
+
+
+
     }
+
+
+
+
+
+
 }
 
 

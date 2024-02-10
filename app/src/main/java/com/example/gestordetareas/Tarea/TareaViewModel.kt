@@ -91,6 +91,18 @@ class TareaViewModel {
         this._estaFinalizada.value = it
     }
 
+    fun cambiarIdUsuarioTareaAsignada(it: String) {
+        this._idUsuarioAsignado.value = it
+    }
+
+    fun obtenerIdUsuarioTareaAsignada(): String {
+        var id = ""
+        if(_idUsuarioAsignado.value != null){
+            id = _idUsuarioAsignado.value!!
+        }
+        return id
+    }
+
     fun listarTareas() {
         var tareas = ArrayList<com.amplifyframework.datastore.generated.model.Tarea>()
         tareas.clear()
@@ -142,10 +154,13 @@ class TareaViewModel {
     }
 
     fun limpiarAtributosSueltos(){
+        this._idTarea.value = null
         this._descripcion.value = ""
         this._estimacionHoras.value = 0.0
         this._dificultad.value = ""
         this._estaFinalizada.value = false
+        this._idUsuarioAsignado.value = ""
+        this._estaAsignada.value = false
     }
 
     fun obtenerTareaLimpia(): Tarea {
@@ -228,5 +243,27 @@ class TareaViewModel {
         this._horasInvertidas.value = InterVentana.tareaActiva!!.horasInvertidas
         this._estaAsignada.value = InterVentana.tareaActiva!!.estaAsignada
         this._estaFinalizada.value = InterVentana.tareaActiva!!.estaFinalizada
+        this._idUsuarioAsignado.value = InterVentana.tareaActiva!!.tareaUsuarioTareaId
     }
+
+
+    fun obtenerNombreUsuarioById(id: String, onNombreObtenido: (String) -> Unit) {
+        Amplify.DataStore.query(
+            com.amplifyframework.datastore.generated.model.Usuario::class.java,
+            Where.matches(
+                com.amplifyframework.datastore.generated.model.Usuario.ID.eq(id)
+            ),
+            { goodTasks ->
+                while (goodTasks.hasNext()) {
+                    val usuario = goodTasks.next()
+                    val nombre = usuario.nombreCompleto
+                    Log.i("Sergio", "Usuario encontrado: $usuario")
+                    Log.i("Sergio", "Nombre del usuario: $nombre")
+                    onNombreObtenido(nombre)
+                }
+            },
+            { error -> Log.e("Sergio", "Error al realizar la consulta", error) }
+        )
+    }
+
 }

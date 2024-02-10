@@ -17,6 +17,9 @@ import com.example.gestordetareas.ElementosComunes.InterVentana
 import com.example.gestordetareas.ElementosComunes.Rutas
 
 import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 import java.util.concurrent.CompletableFuture
 
 
@@ -67,6 +70,12 @@ class UsuarioViewModel {
 
     private val _tareasFinalizadas = MutableLiveData<Int>()
     val tareasFinalizadas : LiveData<Int> = _tareasFinalizadas
+
+    private val _esGuardar = MutableLiveData<Boolean>()
+    val esGuardar : LiveData<Boolean> = _esGuardar
+
+    private val _selectedImageUri = MutableLiveData<Uri>()
+    val selectedImageUri : LiveData<Uri> = _selectedImageUri
 
 
     fun cambiarNombre(nombre:String){
@@ -136,6 +145,18 @@ class UsuarioViewModel {
 
     fun getTareasFinalizadas(): Int {
         return _tareasFinalizadas.value!!
+    }
+
+    fun cambiarEsGuardar(it: Boolean) {
+        this._esGuardar.value = it
+    }
+
+    fun cambiarSelectedImageUri(it: Uri) {
+        this._selectedImageUri.value = it
+    }
+
+    fun getSelectedImageUri(): Uri? {
+        return _selectedImageUri.value
     }
 
     fun guardarModificarUsuario(usuario: Usuario): CompletableFuture<Boolean> {
@@ -269,67 +290,48 @@ class UsuarioViewModel {
 
 
 
-    fun subirImagenAAWS(context: Context ,uri: Uri) {
-    // Obtener el contexto actual
-//    val context = LocalContext.current
 
-    // Obtener el archivo desde la URI
-    val archivo = File(getRealPathFromURI(context, uri))
 
-        // Subir el archivo a AWS utilizando Amplify Storage
-        Amplify.Storage.uploadFile(
-            _id.value!!,  // Ruta en el bucket de AWS
-            archivo,
-            { result ->
-                // Éxito al subir el archivo, obtén la URL de la imagen en AWS
-                obtenerUrlAWS(result.key, context)
-            },
-            { error ->
-                // Manejar error al subir el archivo
-                Log.e("SubidaAWS", "Error al subir la imagen a AWS: $error")
-            }
-        )
-    }
-
-        fun obtenerUrlAWS(key: String, context: Context) {
-        // Obtener la URL de la imagen en AWS utilizando Amplify Storage
-            Amplify.Storage.getUrl(key,
-                { url ->
-                    // Éxito al obtener la URL, actualiza el ViewModel con la URL de la imagen en AWS
-                    _fotoPerfil.value!!.toString()
+    fun subirFotoDePerfil(context: Context, uri: Uri) {
+        Log.i("SubidaAWS", "Subiendo la imagen a AWS")
+        val rutaArchivo = getRealPathFromURI(context, uri)
+        rutaArchivo?.let { ruta ->
+            val archivo = File(ruta)
+            Amplify.Storage.uploadFile(
+                "fotosperfil/${usuarioActual.value?.id}",  // Ruta en el bucket de AWS
+                archivo,
+                { result ->
+                    // Éxito al subir el archivo, obtén la URL de la imagen en AWS
+                    obtenerUrlAWS(result.key, context) { url ->
+                        // Actualiza la URL de la foto de perfil en el ViewModel
+                        _fotoPerfil.postValue(url.toString())
+                        Log.i("SubidaAWS", "URL de la imagen en AWS: $url")
+                    }
                 },
                 { error ->
-                    // Manejar error al obtener la URL
-                    Log.e("ObtenerUrlAWS", "Error al obtener la URL de la imagen en AWS: $error")
+                    // Manejar error al subir el archivo
+                    Log.e("SubidaAWS", "Error al subir la imagen a AWS: $error")
                 }
             )
         }
+    }
 
 
 
-
-//    private fun subirImagenAAWS(context: Context,  uri: Uri) {
-//        // Obtener el contexto actual
-//
-//
-//        // Obtener el archivo desde la URI
-//        val archivo = File(getRealPathFromURI(context, uri))
-//
-//        // Subir el archivo a AWS utilizando Amplify Storage
-//        Amplify.Storage.uploadFile(
-//            "fotosperfil/" + usuarioViewModel.getIdUsuarioActual(),  // Ruta en el bucket de AWS
-//            archivo,
-//            { result ->
-//                // Éxito al subir el archivo, obtén la URL de la imagen en AWS
-//                obtenerUrlAWS(result.key, context)
-//            },
-//            { error ->
-//                // Manejar error al subir el archivo
-//                Log.e("SubidaAWS", "Error al subir la imagen a AWS: $error")
-//            }
-//        )
-//    }
-//
+    fun obtenerUrlAWS(key: String, context: Context, param: (String) -> Unit) {
+        // Obtener la URL de la imagen en AWS utilizando Amplify Storage
+        Amplify.Storage.getUrl(
+            key,
+            { url ->
+                // Éxito al obtener la URL, llama a la función de callback con la URL
+                param(url.toString())
+            },
+            { error ->
+                // Manejar error al obtener la URL
+                Log.e("ObtenerUrlAWS", "Error al obtener la URL de la imagen en AWS: $error")
+            }
+        )
+    }
 
 
 

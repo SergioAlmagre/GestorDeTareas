@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.amplifyframework.datastore.generated.model.Tarea
+import com.amplifyframework.datastore.generated.model.Usuario
 import com.example.gestordetareas.ElementosComunes.BotonCancelar
 import com.example.gestordetareas.ElementosComunes.InterVentana
 import com.example.gestordetareas.ListaUsuarios.ListadoUsuariosViewModel
@@ -117,6 +118,7 @@ fun TareaVerBody(
     val estaAsignada: Boolean by tareaViewModel.estaAsignada.observeAsState(false)
     val coroutineScope = rememberCoroutineScope()
     var isExpanded by remember { mutableStateOf(false) }
+    var nombreAsociado by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -129,28 +131,51 @@ fun TareaVerBody(
         ) {
 
             if(InterVentana.usuarioActivo!!.rol == Rutas.rolAdministrador){
-                IconButton(
-                    onClick = {
-                        coroutineScope.launch {
-                            isExpanded = true
+                if(tareaViewModel.estaAsignadaONull(!estaAsignada)){
+                    IconButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                isExpanded = true
+                            }
+                        }
+                    ){
+                        Icon(Icons.Default.PersonAdd, contentDescription = "Asiganar tarea")
+                    }
+                    Text("Tarea sin asignar")
+                }else{
+                    IconButton(
+                        onClick = {
+                            Log.i("Sergio", "Se ha pulsado el botón para desasignar la tarea")
+                            tareaViewModel.setIdUsuarioAsignado(null)
+                            tareaViewModel.cambiarEstaAsignada(false)
+                        }
+                    ){
+                        Icon(Icons.Default.Cancel, contentDescription = "Desasignar tarea")
+                    }
+
+                    Text("Asignada a: ")
+                    if(estaAsignada){
+//                        tareaViewModel.obtenerNombreUsuarioById(InterVentana.tareaActiva!!.tareaUsuarioTareaId) { nombre ->
+                        tareaViewModel.obtenerNombreUsuarioById(tareaViewModel.idUsuarioAsignado.value!!) { nombre ->
+                            nombreAsociado = nombre   // Aquí puedes usar el nombre obtenido del usuario
+                            Log.i("Sergio", "Nombre del usuario: $nombreAsociado")
                         }
                     }
-                ) {
-                    Icon(Icons.Default.PersonAdd, contentDescription = "Asiganar tarea")
+
+                    Text(nombreAsociado)
                 }
-                if(tareaViewModel.estaAsignadaONull(estaAsignada)){
-                    Text("Asignada a: ")
-                    Text(usuarioViewModel.nombreCompleto.value.toString())
-                }else{
-                    Text("Tarea sin asignar")
-                }
+
                 DropDownUsuariosVer(
                     listadoUsuariosViewModel = listadoUsuariosViewModel,
                     isExpanded = isExpanded,
                     setExpanded = { isExpanded = it },
-                    setSelected = {}
+                    setSelected = {
+                        tareaViewModel.cambiarIdUsuarioTareaAsignada(it.id)
+                        tareaViewModel.cambiarEstaAsignada(true)
+
+                        }
                 )
-                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
             }
             if(InterVentana.usuarioActivo!!.rol == Rutas.rolProgramador){
                 if (tareaViewModel.estaAsignadaONull(estaAsignada)) {
@@ -259,15 +284,15 @@ fun TareaVerBody(
             Button(onClick = {
 
                 val t = tareaViewModel.getTareaByAtributosSueltos()
+                tareaViewModel.guardarModificarTarea(t)
 
                 if(InterVentana.usuarioActivo!!.rol == Rutas.rolProgramador){
                     listadoTareasViewModel.getTareasNoFinalizadas()
                 }
+
                 if(InterVentana.usuarioActivo!!.rol == Rutas.rolAdministrador){
                     listadoTareasViewModel.getTodasLasTareas()
                 }
-
-                tareaViewModel.guardarModificarTarea(t)
 
                 if(estaFinalizada){
                     usuarioViewModel.guardarModificarUsuario(InterVentana.usuarioActivo!!)
@@ -346,23 +371,29 @@ fun mostrarPorcentaje(tareaViewModel: TareaViewModel){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropDownUsuariosVer(listadoUsuariosViewModel: ListadoUsuariosViewModel, isExpanded: Boolean, setExpanded: (Boolean) -> Unit, setSelected:(String)->Unit) {
+fun DropDownUsuariosVer(
+    listadoUsuariosViewModel: ListadoUsuariosViewModel,
+    isExpanded: Boolean,
+    setExpanded: (Boolean) -> Unit,
+    setSelected: (Usuario) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
-    val usuarios = listadoUsuariosViewModel.usuarios.map { it.nombreCompleto }
+    val usuarios = listadoUsuariosViewModel.usuarios
     Column(modifier = Modifier.padding(10.dp)) {
         DropdownMenu(expanded = isExpanded, onDismissRequest = {
             setExpanded(false)
-        })
-        {
-            usuarios.forEach {
-                DropdownMenuItem(text = { Text(text = it) }, onClick = {
+        }) {
+            usuarios.forEach { usuario ->
+                DropdownMenuItem(text = { Text(text = usuario.nombreCompleto) }, onClick = {
                     setExpanded(false)
-                    setSelected(it)
+                    setSelected(usuario)
                 })
             }
         }
     }
 }
+
+
 
 //
 //@OptIn(ExperimentalMaterial3Api::class)

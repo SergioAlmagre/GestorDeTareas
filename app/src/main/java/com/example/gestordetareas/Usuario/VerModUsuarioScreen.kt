@@ -1,9 +1,7 @@
 package com.example.gestordetareas.Usuario
 
-import android.content.Context
-import android.database.Cursor
 import android.net.Uri
-import android.provider.MediaStore
+import android.os.StrictMode
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,7 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -24,12 +21,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -49,10 +43,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -62,14 +53,11 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.room.util.query
-import com.amplifyframework.core.Amplify
 import com.example.gestordetareas.ElementosComunes.InterVentana
-import com.example.gestordetareas.ListaUsuarios.ListadoUsuariosViewModel
 import com.example.gestordetareas.ElementosComunes.Rutas
+import com.example.gestordetareas.ListaUsuarios.ListadoUsuariosViewModel
 import com.example.gestordetareas.R
 import com.google.accompanist.coil.rememberCoilPainter
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.io.File
 
 
@@ -210,11 +198,14 @@ fun ImagenUsuario(
     val fotoPerfil: String by usuarioViewModel.fotoPerfil.observeAsState("")
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     selectedImageUri = fotoPerfil.toUri()
+    val esGuardar: Boolean by usuarioViewModel.esGuardar.observeAsState(false)
+
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             selectedImageUri = it
             onImageSelected(it.toString())
+            usuarioViewModel.cambiarSelectedImageUri(it)
         }
     }
 
@@ -263,13 +254,39 @@ fun ImagenUsuario(
                     contentDescription = "Avatar",
                     modifier = Modifier.size(250.dp)
                 )
+//
+//                if(esGuardar){
+//                    usuarioViewModel.cambiarFotoPerfil(selectedImageUri.toString())
+//                    usuarioViewModel.subirFotoDePerfil(context,selectedImageUri.toString().toUri())
+//                    usuarioViewModel.cambiarEsGuardar(false)
+//                    Log.i("Sergio", "Imagen: " + selectedImageUri.toString())
+//                }
 
-                archivo?.let {
-                    // Hacer algo con el archivo
-                }
-
-                usuarioViewModel.subirImagenAAWS(context,fotoPerfil.toUri())
-                usuarioViewModel.cambiarFotoPerfil(selectedImageUri.toString())
+                // para probar a subir la imagen a lo bruto pero no la sube ni da error, probablemente sea algún problema de permisos
+//                archivo?.let {
+//                    Amplify.Storage.uploadFile(
+//                        "fotosperfil/${usuarioViewModel.id}",  // Ruta en el bucket de AWS
+//                        archivo,
+//                        { result ->
+//                            // Éxito al subir el archivo, obtén la URL de la imagen en AWS
+//                            Amplify.Storage.getUrl(
+//                                result.key,
+//                                { url ->
+//                                    // Éxito al obtener la URL, llama a la función de callback con la URL
+//                                    url.toString()
+//                                },
+//                                { error ->
+//                                    // Manejar error al obtener la URL
+//                                    Log.e("ObtenerUrlAWS", "Error al obtener la URL de la imagen en AWS: $error")
+//                                }
+//                            )
+//                        },
+//                        { error ->
+//                            // Manejar error al subir el archivo
+//                            Log.e("SubidaAWS", "Error al subir la imagen a AWS: $error")
+//                        }
+//                    )
+//                }
 
             } else {
                 // Si no hay una imagen seleccionada, muestra la foto de perfil por defecto
@@ -282,141 +299,6 @@ fun ImagenUsuario(
         }
     }
 }
-
-
-
-//fun getRealPathFromURI(context: Context, uri: Uri): String? {
-//    var cursor: Cursor? = null
-//    return try {
-//        val proj = arrayOf(MediaStore.Images.Media.DATA)
-//        cursor = context.contentResolver.query(uri, proj, null, null, null)
-//        val columnIndex = cursor?.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-//        cursor?.moveToFirst()
-//        columnIndex?.let {
-//            cursor?.getString(it)
-//        }
-//    } finally {
-//        cursor?.close()
-//    }
-//}
-
-//fun obtenerUrlAWS(key: String, context: Context) {
-//    // Obtener la URL de la imagen en AWS utilizando Amplify Storage
-//    Amplify.Storage.getUrl(key,
-//        { url ->
-//            // Éxito al obtener la URL, actualiza el ViewModel con la URL de la imagen en AWS
-//            onImageSelected(url.toString())
-//        },
-//        { error ->
-//            // Manejar error al obtener la URL
-//            Log.e("ObtenerUrlAWS", "Error al obtener la URL de la imagen en AWS: $error")
-//        }
-//    )
-//}
-
-//private fun subirImagenAAWS(uri: Uri) {
-//    // Obtener el contexto actual
-//    val context = LocalContext.current
-//
-//    // Obtener el archivo desde la URI
-//    val archivo = File(getRealPathFromURI(context, uri))
-//
-//    // Subir el archivo a AWS utilizando Amplify Storage
-//    Amplify.Storage.uploadFile(
-//        usuarioViewModel.getIdUsuarioActual(),  // Ruta en el bucket de AWS
-//        archivo,
-//        { result ->
-//            // Éxito al subir el archivo, obtén la URL de la imagen en AWS
-//            obtenerUrlAWS(result.key, context)
-//        },
-//        { error ->
-//            // Manejar error al subir el archivo
-//            Log.e("SubidaAWS", "Error al subir la imagen a AWS: $error")
-//        }
-//    )
-//}
-
-
-
-
-
-
-//@Composable
-//fun ImagenUsuario(
-//    usuarioViewModel: UsuarioViewModel,
-//    onImageSelected: (String) -> Unit
-//) {
-//    val context = LocalContext.current
-//    val uriHandler = LocalUriHandler.current
-//    val view = LocalView.current
-//    var isGalleryOpen by remember { mutableStateOf(false) }
-//    val fotoPerfil: String by usuarioViewModel.fotoPerfil.observeAsState("")
-//    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-//    selectedImageUri = fotoPerfil.toUri()
-//
-//    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-//        uri?.let {
-//            selectedImageUri = it
-//            onImageSelected(it.toString())
-//        }
-//    }
-//
-//    // Maneja la lógica cuando el usuario selecciona una imagen desde la galería
-//    DisposableEffect(isGalleryOpen) {
-//        if (isGalleryOpen) {
-//            // Lanza la actividad de la galería
-//            launcher.launch("image/*")
-//
-//            // Marca el estado como cerrado después de seleccionar la imagen
-//            isGalleryOpen = false
-//        }
-//
-//        // Limpia el efecto cuando el compositor se desmonta
-//        onDispose { }
-//    }
-//
-//    // Usa una superficie para mostrar la imagen o el botón de abrir la galería
-//    Surface(
-//        modifier = Modifier
-//            .size(250.dp)
-//            .fillMaxWidth()
-//            .offset(x = 70.dp)
-//            .clip(CircleShape)
-//            .clickable {
-//                // Cambia el estado para abrir la galería
-//                isGalleryOpen = true
-//            },
-//        ) {
-//
-//        Box(
-//            modifier = Modifier
-//                .size(250.dp)
-//                .padding(8.dp)
-//        ) {
-//            // Si hay una URI de imagen seleccionada, muestra la imagen
-//            if (selectedImageUri != null) {
-//                Image(
-//                    painter = rememberCoilPainter(
-//                        request = selectedImageUri.toString(),
-//                        fadeIn = true
-//                    ),
-//                    contentDescription = "Avatar",
-//                    modifier = Modifier.size(250.dp)
-//                )
-//                usuarioViewModel.cambiarFotoPerfil(selectedImageUri.toString())
-//            } else {
-//                // Si no hay una imagen seleccionada, muestra la foto de perfil por defecto
-//                Image(
-//                    painter = painterResource(id = R.drawable.usuariorobot),
-//                    contentDescription = "Avatar",
-//                    modifier = Modifier.size(250.dp)
-//                )
-//            }
-//        }
-//    }
-//}
-
-
 
 
 
@@ -563,12 +445,19 @@ fun BotonGuardarDatosModUsu(navController: NavController, ruta:String, usuarioVi
 //    var usuarioActual = usuarioViewModel.obtenerUsuarioActual()
 //    usuarioViewModel.cambiarId("1")     ///RESVISAR ORIGEN DE DATOS!!!!!!!!!
 //    usuarioViewModel.cambiarNombreUsuarioActual("Sergio Núñez Bautista") ///RESVISAR ORIGEN DE DATOS!!!!!!!!!
+    val context = LocalContext.current
+    val selectedImageUri: Uri? by usuarioViewModel.selectedImageUri.observeAsState(null)
 
     Button(
         onClick = {
-//            var usu = Usuario.builder().id(usuarioViewModel.id.value).rol(usuarioViewModel.rol.value).nombreCompleto(usuarioViewModel.nombreCompleto.value).email("usuarioactual@gmail.com").tareasFinalizadas(45).build()
-//            usuarioViewModel.guardarModificarUsuario(usu)
 
+
+//            usuarioViewModel.subirFotoDePerfil(context,fotoPerfil.toUri())
+
+            usuarioViewModel.subirFotoDePerfil(context,selectedImageUri.toString().toUri())
+            usuarioViewModel.cambiarFotoPerfil(selectedImageUri.toString())
+
+            usuarioViewModel.cambiarEsGuardar(true)
             var usu = usuarioViewModel.getUsuarioByAtributosSueltos()
             usuarioViewModel.guardarModificarUsuario(usu)
             listadoUsuariosViewModel.getUsers()

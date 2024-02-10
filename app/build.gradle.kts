@@ -72,9 +72,9 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    implementation("androidx.compose.material:material-icons-extended:1.6.0")
-    implementation("androidx.navigation:navigation-compose:2.7.6")
-    implementation("androidx.compose.runtime:runtime-livedata:1.6.0")
+    implementation("androidx.compose.material:material-icons-extended:1.6.1")
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.compose.runtime:runtime-livedata:1.6.1")
 
     // Amplify plugins
     implementation("com.amplifyframework:core:2.14.8")
@@ -96,4 +96,6 @@ dependencies {
 
     //Necesario para la carga de Imágenes (preferible a Glide).
     implementation("io.coil-kt:coil-compose:1.3.2")
+    implementation ("io.coil-kt:coil-compose:1.4.0")
+
 }
