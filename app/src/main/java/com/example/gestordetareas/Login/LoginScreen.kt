@@ -54,8 +54,12 @@ import com.amplifyframework.core.Amplify
 import com.example.gestordetareas.ElementosComunes.Rutas
 import com.example.gestordetareas.ListadoTareas.ListadoTareasViewModel
 import android.content.Context
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import com.example.gestordetareas.CrearCuenta.CrearCuentaViewModel
 import com.example.gestordetareas.ElementosComunes.InterVentana
+import com.example.gestordetareas.R
 import com.example.gestordetareas.Usuario.UsuarioViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -93,6 +97,12 @@ fun Login(
             .fillMaxSize()
             .padding(8.dp)
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.bk),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds
+        )
         Column {
 
             Spacer(modifier = Modifier.size(40.dp))
